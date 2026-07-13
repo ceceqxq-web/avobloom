@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { isMissingRecurringExpensesTableError } from "@/lib/expenseService";
+import { saveExpensesErrorMessages } from "@/lib/expenseContracts";
+import type {
+  ExpenseCreateInput,
+  RecurringExpenseCreateInput,
+  SaveExpensesRequest,
+  SaveExpensesResponse,
+} from "@/lib/expenseContracts";
 import {
   ExpenseAnalysis,
   ExpenseAnalysisResult,
@@ -283,10 +289,15 @@ export default function ExpenseForm() {
   async function handleSave() {
     if (isSaving) return;
     setSaveError("");
-    const validItems = items
-      .filter((item) => item.item_name.trim() || item.purchase_price > 0)
-      .map((item) => {
-        const base = {
+    const validItems = items.filter(
+      (item) => item.item_name.trim() || item.purchase_price > 0,
+    );
+    const expenses: ExpenseCreateInput[] = validItems
+      .filter(
+        (item) =>
+          item.financial_type !== "ongoing_cost" || item.recurrence_frequency === "none",
+      )
+      .map((item) => ({
         merchant: item.merchant,
         item_name: item.item_name,
         purchase_price: Number(item.purchase_price || 0),
@@ -308,19 +319,8 @@ export default function ExpenseForm() {
         price_reasoning: item.price_reasoning,
         ai_confidence: Number(item.ai_confidence || 0),
         ai_summary: item.ai_summary || analysisSummary,
-        };
-
-        return {
-          ...base,
-          recurrence_frequency: item.recurrence_frequency || "none",
-          recurring_start_date:
-            item.recurring_start_date || item.expense_date || new Date().toISOString().slice(0, 10),
-        };
-      });
-    const expenses = validItems.filter(
-      (item) => item.financial_type !== "ongoing_cost" || item.recurrence_frequency === "none",
-    );
-    const recurringExpenses = validItems
+      }));
+    const recurringExpenses: RecurringExpenseCreateInput[] = validItems
       .filter(
         (item) =>
           item.financial_type === "ongoing_cost" &&
@@ -343,8 +343,10 @@ export default function ExpenseForm() {
         ai_confidence: item.ai_confidence,
         ai_summary: item.ai_summary,
         recurrence_frequency: item.recurrence_frequency as "weekly" | "monthly",
-        start_date: item.recurring_start_date,
-        next_occurrence_date: item.recurring_start_date,
+        start_date:
+          item.recurring_start_date || item.expense_date || new Date().toISOString().slice(0, 10),
+        next_occurrence_date:
+          item.recurring_start_date || item.expense_date || new Date().toISOString().slice(0, 10),
         is_active: true,
       }));
 
@@ -356,19 +358,19 @@ export default function ExpenseForm() {
     setIsSaving(true);
 
     try {
+      const payload: SaveExpensesRequest = { expenses, recurringExpenses };
       const response = await fetch("/api/expenses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ expenses, recurringExpenses }),
+        body: JSON.stringify(payload),
       });
-      const result = (await response.json()) as { error?: string };
+      const result = (await response.json()) as SaveExpensesResponse;
 
-      if (!response.ok) {
-        const message = result.error || "The expense could not be saved.";
+      if (!response.ok || !result.ok) {
         setSaveError(
-          isMissingRecurringExpensesTableError(message)
-            ? "还差一次数据库设置：循环支出需要 recurring_expenses 表。请在 Supabase SQL Editor 执行数据库迁移后再保存。"
-            : message,
+          result.ok
+            ? saveExpensesErrorMessages.DATABASE_WRITE_FAILED
+            : saveExpensesErrorMessages[result.code],
         );
         return;
       }
@@ -382,12 +384,8 @@ export default function ExpenseForm() {
       setAnalysisError("");
       setSaveError("");
       router.refresh();
-    } catch (error) {
-      setSaveError(
-        error instanceof Error
-          ? error.message
-          : "The expense could not be saved. Check your connection and try again.",
-      );
+    } catch {
+      setSaveError("The server could not be reached. Check your connection and try again.");
     } finally {
       setIsSaving(false);
     }

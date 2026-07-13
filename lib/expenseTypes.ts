@@ -1,3 +1,5 @@
+import type { Tables } from "./database.types";
+
 export const financialTypes = [
   "expense",
   "ongoing_cost",
@@ -34,10 +36,7 @@ export type ExpenseInput = {
   recurring_start_date?: string;
 };
 
-export type ExpenseRecord = ExpenseInput & {
-  id: string;
-  created_at?: string;
-};
+export type ExpenseRecord = Tables<"expenses">;
 
 export type ExpenseAnalysis = {
   merchant: string;
@@ -72,13 +71,7 @@ export type RecurringExpenseInput = Omit<
   is_active?: boolean;
 };
 
-export type RecurringExpenseRecord = RecurringExpenseInput & {
-  user_id?: string;
-  id: string;
-  created_at?: string;
-  last_generated_date?: string;
-  is_active: boolean;
-};
+export type RecurringExpenseRecord = Tables<"recurring_expenses">;
 
 export type ExpenseAnalysisResult = {
   items: ExpenseAnalysis[];
