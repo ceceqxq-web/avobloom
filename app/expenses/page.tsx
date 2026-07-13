@@ -1,7 +1,7 @@
 import AppLogo from "@/components/AppLogo";
+import RecurringExpenseSync from "@/components/RecurringExpenseSync";
 import ExpensesTable from "./ExpensesTable";
 import UpcomingRecurringCosts from "./UpcomingRecurringCosts";
-import { materializeDueRecurringExpenses } from "@/lib/expenseService";
 import { createClient } from "@/lib/supabase/server";
 import { ExpenseRecord, RecurringExpenseRecord } from "@/lib/expenseTypes";
 import UserMenu from "@/components/UserMenu";
@@ -13,17 +13,17 @@ export default async function ExpensesPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  await materializeDueRecurringExpenses(supabase);
 
-  const { data: expenses, error } = await supabase
-    .from("expenses")
-    .select("*")
-    .order("created_at", { ascending: false });
-  const { data: recurringExpenses } = await supabase
-    .from("recurring_expenses")
-    .select("*")
-    .eq("is_active", true)
-    .order("next_occurrence_date", { ascending: true });
+  const [expenseResult, recurringResult] = await Promise.all([
+    supabase.from("expenses").select("*").order("created_at", { ascending: false }),
+    supabase
+      .from("recurring_expenses")
+      .select("*")
+      .eq("is_active", true)
+      .order("next_occurrence_date", { ascending: true }),
+  ]);
+  const { data: expenses, error } = expenseResult;
+  const { data: recurringExpenses } = recurringResult;
 
   if (error) {
     return <main className="p-6">Error: {error.message}</main>;
@@ -31,6 +31,7 @@ export default async function ExpensesPage() {
 
   return (
     <main className="min-h-screen bg-[#F7F5F1] px-6 py-8 text-[#22211F]">
+      <RecurringExpenseSync />
       <div className="mx-auto max-w-7xl">
         <div className="mb-7 flex items-center justify-between gap-4">
           <AppLogo compact />

@@ -130,6 +130,7 @@ export async function createRecurringExpenses(recurringExpenses: RecurringExpens
 
 export async function materializeDueRecurringExpenses(client: SupabaseClient = supabase) {
   const today = new Date().toISOString().slice(0, 10);
+  let materializedCount = 0;
   const { data, error } = await client
     .from("recurring_expenses")
     .select("*")
@@ -157,6 +158,7 @@ export async function materializeDueRecurringExpenses(client: SupabaseClient = s
     if (dueExpenses.length) {
       const { error: insertError } = await client.from("expenses").insert(dueExpenses);
       if (insertError) return { error: insertError };
+      materializedCount += dueExpenses.length;
 
       const { error: updateError } = await client
         .from("recurring_expenses")
@@ -170,7 +172,7 @@ export async function materializeDueRecurringExpenses(client: SupabaseClient = s
     }
   }
 
-  return { error: null };
+  return { error: null, materializedCount };
 }
 
 export async function updateExpense(id: string, expense: ExpenseInput) {
