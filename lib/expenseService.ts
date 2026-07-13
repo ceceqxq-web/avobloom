@@ -7,9 +7,11 @@ import {
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 async function getUserId(client: SupabaseClient = supabase) {
-  const { data: { user }, error } = await client.auth.getUser();
-  if (error || !user) throw new Error("Please sign in before changing expenses.");
-  return user.id;
+  const { data: { session }, error } = await client.auth.getSession();
+  if (error || !session?.user) {
+    throw new Error("Your login session is unavailable. Please sign in again, then retry.");
+  }
+  return session.user.id;
 }
 
 function toLegacyExpense(expense: ExpenseInput) {
@@ -125,7 +127,7 @@ export async function createRecurringExpenses(recurringExpenses: RecurringExpens
     return result;
   }
 
-  return await materializeDueRecurringExpenses();
+  return result;
 }
 
 export async function materializeDueRecurringExpenses(client: SupabaseClient = supabase) {

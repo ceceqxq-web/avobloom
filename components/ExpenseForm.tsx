@@ -283,6 +283,7 @@ export default function ExpenseForm() {
   }
 
   async function handleSave() {
+    if (isSaving) return;
     setSaveError("");
     const validItems = items
       .filter((item) => item.item_name.trim() || item.purchase_price > 0)
@@ -355,35 +356,44 @@ export default function ExpenseForm() {
     }
 
     setIsSaving(true);
-    const expenseResult = expenses.length
-      ? await createExpenses(expenses)
-      : { error: null };
-    const recurringResult = recurringExpenses.length
-      ? await createRecurringExpenses(recurringExpenses)
-      : { error: null };
-    const error = expenseResult.error || recurringResult.error;
 
-    if (error) {
-      setIsSaving(false);
+    try {
+      const [expenseResult, recurringResult] = await Promise.all([
+        expenses.length ? createExpenses(expenses) : Promise.resolve({ error: null }),
+        recurringExpenses.length
+          ? createRecurringExpenses(recurringExpenses)
+          : Promise.resolve({ error: null }),
+      ]);
+      const error = expenseResult.error || recurringResult.error;
+
+      if (error) {
+        setSaveError(
+          isMissingRecurringExpensesTableError(error.message)
+            ? "还差一次数据库设置：循环支出需要 recurring_expenses 表。请在 Supabase SQL Editor 执行数据库迁移后再保存。"
+            : error.message,
+        );
+        return;
+      }
+
+      setRawText("");
+      setImageFile(null);
+      setImagePreviewUrl("");
+      setImagePreviewStatus("");
+      setItems([]);
+      setAnalysisSummary("");
+      setAnalysisError("");
+      setSaveError("");
+      void revalidateExpenseViews();
+      router.refresh();
+    } catch (error) {
       setSaveError(
-        isMissingRecurringExpensesTableError(error.message)
-          ? "还差一次数据库设置：循环支出需要 recurring_expenses 表。请在 Supabase SQL Editor 执行 `supabase/migrations/202607120002_add_recurring_expenses.sql`，执行成功后刷新页面再保存。"
-          : error.message,
+        error instanceof Error
+          ? error.message
+          : "The expense could not be saved. Check your connection and try again.",
       );
-      return;
+    } finally {
+      setIsSaving(false);
     }
-
-    setRawText("");
-    setImageFile(null);
-    setImagePreviewUrl("");
-    setImagePreviewStatus("");
-    setItems([]);
-    setAnalysisSummary("");
-    setAnalysisError("");
-    setSaveError("");
-    setIsSaving(false);
-    await revalidateExpenseViews();
-    router.refresh();
   }
 
   const inputClass =
@@ -516,12 +526,6 @@ export default function ExpenseForm() {
       {analysisError && (
         <div className="rounded-[24px] border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
           {analysisError}
-        </div>
-      )}
-
-      {saveError && (
-        <div className="rounded-[24px] border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
-          {saveError}
         </div>
       )}
 
@@ -786,19 +790,35 @@ export default function ExpenseForm() {
       )}
 
       {items.length > 0 && (
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="mt-2 w-full rounded-full bg-[#1F1F1F] px-5 py-3.5 text-sm font-medium leading-6 text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isSaving
-            ? "Saving..."
-            : recurringItemCount
-              ? `Save ${recurringItemCount} Subscription Schedule${
-                  recurringItemCount === 1 ? "" : "s"
-                }`
-              : `Save ${items.length} Expense Item${items.length === 1 ? "" : "s"}`}
-        </button>
+        <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 mt-2 space-y-2 rounded-[24px] bg-[#fbf8f3]/95 p-2 shadow-[0_-10px_30px_rgba(31,31,31,.08)] backdrop-blur md:static md:bg-transparent md:p-0 md:shadow-none">
+          {saveError && (
+            <div
+              aria-live="assertive"
+              className="rounded-[18px] border border-red-200 bg-red-50 p-3 text-sm leading-5 text-red-700"
+              role="alert"
+            >
+              {saveError}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={isSaving}
+            aria-busy={isSaving}
+            className="flex w-full touch-manipulation items-center justify-center gap-2 rounded-full bg-[#1F1F1F] px-5 py-3.5 text-sm font-medium leading-6 text-white transition active:scale-[0.98] hover:opacity-90 disabled:cursor-wait disabled:opacity-70"
+          >
+            {isSaving && (
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            )}
+            {isSaving
+              ? "Saving expense…"
+              : recurringItemCount
+                ? `Save ${recurringItemCount} Subscription Schedule${
+                    recurringItemCount === 1 ? "" : "s"
+                  }`
+                : `Save ${items.length} Expense Item${items.length === 1 ? "" : "s"}`}
+          </button>
+        </div>
       )}
     </div>
   );
