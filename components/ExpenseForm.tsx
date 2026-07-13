@@ -2,12 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  createExpenses,
-  createRecurringExpenses,
-  isMissingRecurringExpensesTableError,
-} from "@/lib/expenseService";
-import { revalidateExpenseViews } from "@/lib/revalidateExpenses";
+import { isMissingRecurringExpensesTableError } from "@/lib/expenseService";
 import {
   ExpenseAnalysis,
   ExpenseAnalysisResult,
@@ -358,19 +353,19 @@ export default function ExpenseForm() {
     setIsSaving(true);
 
     try {
-      const [expenseResult, recurringResult] = await Promise.all([
-        expenses.length ? createExpenses(expenses) : Promise.resolve({ error: null }),
-        recurringExpenses.length
-          ? createRecurringExpenses(recurringExpenses)
-          : Promise.resolve({ error: null }),
-      ]);
-      const error = expenseResult.error || recurringResult.error;
+      const response = await fetch("/api/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expenses, recurringExpenses }),
+      });
+      const result = (await response.json()) as { error?: string };
 
-      if (error) {
+      if (!response.ok) {
+        const message = result.error || "The expense could not be saved.";
         setSaveError(
-          isMissingRecurringExpensesTableError(error.message)
+          isMissingRecurringExpensesTableError(message)
             ? "还差一次数据库设置：循环支出需要 recurring_expenses 表。请在 Supabase SQL Editor 执行数据库迁移后再保存。"
-            : error.message,
+            : message,
         );
         return;
       }
@@ -383,7 +378,6 @@ export default function ExpenseForm() {
       setAnalysisSummary("");
       setAnalysisError("");
       setSaveError("");
-      void revalidateExpenseViews();
       router.refresh();
     } catch (error) {
       setSaveError(
