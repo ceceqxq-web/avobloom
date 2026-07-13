@@ -17,6 +17,28 @@ function isValidExpense(value: unknown) {
   );
 }
 
+function isMissingColumnError(message?: string) {
+  return Boolean(
+    message?.includes("schema cache") ||
+      message?.includes("Could not find") ||
+      message?.includes("column"),
+  );
+}
+
+function toCompatibleExpense(expense: ExpenseInput, userId: string) {
+  return {
+    user_id: userId,
+    merchant: expense.merchant,
+    item_name: expense.item_name,
+    purchase_price: expense.purchase_price,
+    expense_date: expense.expense_date,
+    category: expense.category,
+    financial_type: expense.financial_type,
+    current_estimated_value: expense.current_estimated_value,
+    net_worth_impact: expense.net_worth_impact,
+  };
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
@@ -51,7 +73,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid expense items." }, { status: 400 });
   }
 
-  const [expenseResult, recurringResult] = await Promise.all([
+  const [initialExpenseResult, recurringResult] = await Promise.all([
     expenses.length
       ? supabase
           .from("expenses")
@@ -65,6 +87,14 @@ export async function POST(request: Request) {
           )
       : Promise.resolve({ error: null }),
   ]);
+  let expenseResult = initialExpenseResult;
+
+  if (expenses.length && isMissingColumnError(expenseResult.error?.message)) {
+    expenseResult = await supabase
+      .from("expenses")
+      .insert(expenses.map((expense) => toCompatibleExpense(expense, user.id)));
+  }
+
   const error = expenseResult.error || recurringResult.error;
 
   if (error) {

@@ -90,6 +90,7 @@ export default function ExpenseForm() {
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
   const [imagePreviewStatus, setImagePreviewStatus] = useState("");
   const [items, setItems] = useState<ExpenseAnalysis[]>([]);
+  const [expandedItemIndex, setExpandedItemIndex] = useState<number | null>(null);
   const [analysisSummary, setAnalysisSummary] = useState("");
   const [analysisError, setAnalysisError] = useState("");
   const [saveError, setSaveError] = useState("");
@@ -153,6 +154,7 @@ export default function ExpenseForm() {
 
   function applyAnalysis(result: ExpenseAnalysisResult) {
     setItems(result.items.length ? result.items : [blankItem()]);
+    setExpandedItemIndex(null);
     setAnalysisSummary(result.ai_summary);
   }
 
@@ -227,6 +229,7 @@ export default function ExpenseForm() {
 
     if (imageFile && hasOpenAIKey === false) {
       setItems([]);
+      setExpandedItemIndex(null);
       setAnalysisSummary("");
       setAnalysisError(
         "Receipt image analysis is not enabled yet. Add OPENAI_API_KEY to .env.local and restart the dev server.",
@@ -562,10 +565,62 @@ export default function ExpenseForm() {
         </div>
       )}
 
-      {items.length > 0 && analysisSummary && (
-        <div className="rounded-[24px] border border-[#D7CFC2] bg-[#FBF8F3] p-4 text-sm leading-6 text-[#6D675F]">
-          {analysisSummary}
+      {items.length > 0 && (
+        <div className="overflow-hidden rounded-[20px] border border-[#d9d3c9] bg-white">
+          <div className="hidden grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,.9fr)_auto] gap-3 border-b border-[#e8e3db] bg-[#f7f4ef] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8a8176] sm:grid">
+            <span>Item</span>
+            <span>Merchant</span>
+            <span>Category</span>
+            <span className="text-right">Amount</span>
+          </div>
+          {items.map((item, index) => {
+            const expanded = expandedItemIndex === index;
+            return (
+              <button
+                key={`summary-${index}`}
+                type="button"
+                onClick={() => setExpandedItemIndex(expanded ? null : index)}
+                aria-expanded={expanded}
+                className={`grid w-full touch-manipulation grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-[#eee9e1] px-4 py-3 text-left last:border-b-0 active:bg-[#f8f3ed] sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,.9fr)_auto] ${
+                  expanded ? "bg-[#fbf3ee]" : "bg-white"
+                }`}
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-[#22211f]">
+                    {item.item_name || "Unnamed item"}
+                  </span>
+                  <span className="mt-0.5 block truncate text-xs text-[#81796f] sm:hidden">
+                    {item.merchant || "No merchant"} · {item.category || "Other"}
+                  </span>
+                </span>
+                <span className="hidden truncate text-sm text-[#625c55] sm:block">
+                  {item.merchant || "—"}
+                </span>
+                <span className="hidden truncate text-xs text-[#81796f] sm:block">
+                  {item.category || "Other"}
+                </span>
+                <span className="flex items-center justify-end gap-2 whitespace-nowrap text-sm font-semibold text-[#22211f]">
+                  ${Number(item.purchase_price || 0).toFixed(2)}
+                  <span
+                    aria-hidden="true"
+                    className={`text-[#9b9186] transition-transform ${expanded ? "rotate-180" : ""}`}
+                  >
+                   ⌄
+                  </span>
+                </span>
+              </button>
+            );
+          })}
         </div>
+      )}
+
+      {items.length > 0 && analysisSummary && (
+        <details className="rounded-[18px] border border-[#e2dcd3] bg-[#fbf8f3] px-4 py-3 text-sm text-[#6d675f]">
+          <summary className="cursor-pointer select-none font-medium text-[#4d4740]">
+            AI notes
+          </summary>
+          <p className="mt-2 leading-6">{analysisSummary}</p>
+        </details>
       )}
 
       {items.length > 1 && (
@@ -593,22 +648,24 @@ export default function ExpenseForm() {
       )}
 
       <div className="space-y-4">
-        {items.map((item, index) => (
+        {items.map((item, index) => expandedItemIndex === index && (
           <div
             key={index}
-          className="rounded-[22px] border border-[#D7CFC2] bg-[#FBF8F3] p-4"
+            className="scroll-mt-24 rounded-[22px] border border-[#D7CFC2] bg-[#FBF8F3] p-4"
           >
             <div className="mb-4 flex items-center justify-between gap-3">
               <div className="text-sm font-semibold text-[#22211F]">
-                Item {index + 1}
+                Edit item {index + 1}
               </div>
               {items.length > 1 && (
                 <button
-                  onClick={() =>
+                  type="button"
+                  onClick={() => {
                     setItems((currentItems) =>
                       currentItems.filter((_, itemIndex) => itemIndex !== index),
-                    )
-                  }
+                    );
+                    setExpandedItemIndex(null);
+                  }}
                   className="rounded-full border border-[#D7CFC2] px-3 py-1 text-xs text-[#6D675F]"
                 >
                   Remove
@@ -808,7 +865,11 @@ export default function ExpenseForm() {
 
       {items.length > 0 && (
         <button
-          onClick={() => setItems((currentItems) => [...currentItems, blankItem()])}
+          type="button"
+          onClick={() => {
+            setExpandedItemIndex(items.length);
+            setItems((currentItems) => [...currentItems, blankItem()]);
+          }}
           className={inputClass}
         >
           Add another item
