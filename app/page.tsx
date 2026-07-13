@@ -3,7 +3,11 @@ import ExpenseForm from "@/components/ExpenseForm";
 import SpendingGoalDashboard from "@/components/SpendingGoalDashboard";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { ExpenseRecord, calculateNetWorthImpact } from "@/lib/expenseTypes";
+import {
+  ExpenseRecord,
+  RecurringExpenseRecord,
+  calculateNetWorthImpact,
+} from "@/lib/expenseTypes";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +35,55 @@ function getWeekStart(date: Date) {
   return result;
 }
 
+function getWeekEnd(date: Date) {
+  const result = getWeekStart(date);
+  result.setDate(result.getDate() + 6);
+  result.setHours(23, 59, 59, 999);
+  return result;
+}
+
+function getMonthEnd(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+}
+
+function parseDateOnly(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function addRecurringPeriod(
+  date: Date,
+  frequency: RecurringExpenseRecord["recurrence_frequency"],
+) {
+  const next = new Date(date);
+  if (frequency === "weekly") next.setDate(next.getDate() + 7);
+  else next.setMonth(next.getMonth() + 1);
+  return next;
+}
+
+function getScheduledTotal(
+  recurringExpenses: RecurringExpenseRecord[],
+  start: Date,
+  end: Date,
+) {
+  return recurringExpenses.reduce((total, expense) => {
+    let occurrence = parseDateOnly(expense.next_occurrence_date);
+    let scheduled = 0;
+    let guard = 0;
+
+    while (occurrence < start && guard < 60) {
+      occurrence = addRecurringPeriod(occurrence, expense.recurrence_frequency);
+      guard += 1;
+    }
+    while (occurrence <= end && guard < 60) {
+      scheduled += Number(expense.purchase_price || 0);
+      occurrence = addRecurringPeriod(occurrence, expense.recurrence_frequency);
+      guard += 1;
+    }
+    return total + scheduled;
+  }, 0);
+}
+
 function categoryName(value?: string | null) {
   return value?.split(">")[0]?.trim() || "Other";
 }
@@ -49,10 +102,16 @@ export default async function Home() {
     .select("*")
     .order("created_at", { ascending: false })
     .limit(200);
+  const { data: recurringData } = await supabase
+    .from("recurring_expenses")
+    .select("*")
+    .eq("is_active", true);
 
   const expenses = (data || []) as ExpenseRecord[];
+  const recurringExpenses = (recurringData || []) as RecurringExpenseRecord[];
   const now = new Date();
   const weekStart = getWeekStart(now);
+  const upcomingStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   const monthExpenses = expenses.filter((item) => {
     const date = getExpenseDate(item);
     return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
@@ -61,6 +120,16 @@ export default async function Home() {
     const date = getExpenseDate(item);
     return date >= weekStart && date <= now ? sum + Number(item.purchase_price || 0) : sum;
   }, 0);
+  const weekUpcoming = getScheduledTotal(
+    recurringExpenses,
+    upcomingStart,
+    getWeekEnd(now),
+  );
+  const monthUpcoming = getScheduledTotal(
+    recurringExpenses,
+    upcomingStart,
+    getMonthEnd(now),
+  );
   const monthTotal = monthExpenses.reduce(
     (sum, item) => sum + Number(item.purchase_price || 0),
     0,
@@ -128,6 +197,8 @@ export default async function Home() {
               monthTotal={monthTotal}
               netWorthImpact={netWorthImpact}
               weekTotal={weekTotal}
+              weekUpcoming={weekUpcoming}
+              monthUpcoming={monthUpcoming}
             />
 
             <section className="rounded-[26px] bg-[#1f382b] p-6 text-[#f6f4ec] shadow-[0_20px_50px_rgba(31,56,43,.16)]">

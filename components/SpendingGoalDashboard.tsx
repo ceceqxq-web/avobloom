@@ -11,6 +11,8 @@ type SpendingGoalDashboardProps = {
   entryCount: number;
   estimatedValue: number;
   netWorthImpact: number;
+  weekUpcoming: number;
+  monthUpcoming: number;
 };
 
 const storageKey = "expense-spending-goals";
@@ -102,6 +104,8 @@ export default function SpendingGoalDashboard({
   entryCount,
   estimatedValue,
   netWorthImpact,
+  weekUpcoming,
+  monthUpcoming,
 }: SpendingGoalDashboardProps) {
   const [mode, setMode] = useState<GoalMode>("week");
   const [goals, setGoals] = useState(defaultGoals);
@@ -120,12 +124,15 @@ export default function SpendingGoalDashboard({
   }, []);
 
   const activeTotal = mode === "week" ? weekTotal : monthTotal;
+  const activeUpcoming = mode === "week" ? weekUpcoming : monthUpcoming;
+  const committedTotal = activeTotal + activeUpcoming;
   const activeGoal = goals[mode] || defaultGoals[mode];
   const period = getPeriodMeta(mode);
-  const percent = activeGoal > 0 ? Math.round((activeTotal / activeGoal) * 100) : 0;
-  const isOver = activeTotal > activeGoal;
+  const spentPercent = activeGoal > 0 ? (activeTotal / activeGoal) * 100 : 0;
+  const upcomingPercent = activeGoal > 0 ? (activeUpcoming / activeGoal) * 100 : 0;
+  const isOver = committedTotal > activeGoal;
   const status = isOver ? "Over goal" : "Within goal";
-  const remaining = activeGoal - activeTotal;
+  const remaining = activeGoal - committedTotal;
   const dailyRoom = Math.max(remaining, 0) / Math.max(period.daysLeft, 1);
   const statusStyles = isOver
     ? {
@@ -199,6 +206,12 @@ export default function SpendingGoalDashboard({
             <div className="mt-1 text-2xl font-semibold text-[#22211F]">
               {formatMoney(activeTotal)}
             </div>
+            {activeUpcoming > 0 && (
+              <div className="mt-1 flex items-center gap-1.5 text-xs font-medium text-[#5F7667]">
+                <span className="inline-block h-2 w-2 rounded-full bg-[#2F7D4E]/35" />
+                + {formatMoney(activeUpcoming)} scheduled
+              </div>
+            )}
             <div className="mt-1 text-xs text-[#6D675F]">{period.helper}</div>
           </div>
           <div className="text-right text-xs text-[#6D675F]">
@@ -209,17 +222,33 @@ export default function SpendingGoalDashboard({
           </div>
         </div>
 
-        <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-[#E8E1D6]">
+        <div
+          className="mt-3 flex h-2.5 overflow-hidden rounded-full bg-[#E8E1D6]"
+          aria-label={`${formatMoney(activeTotal)} spent and ${formatMoney(activeUpcoming)} scheduled`}
+        >
           <div
-            className="h-full rounded-full transition-all duration-500 ease-out"
+            className="h-full transition-all duration-500 ease-out"
             style={{
-              width: `${Math.min(percent, 100)}%`,
+              width: `${Math.min(spentPercent, 100)}%`,
               background: statusStyles.bar,
+            }}
+          />
+          <div
+            className="h-full border-l border-white/70 transition-all duration-500 ease-out"
+            style={{
+              width: `${Math.min(upcomingPercent, Math.max(100 - spentPercent, 0))}%`,
+              background: statusStyles.bar,
+              opacity: 0.32,
             }}
           />
         </div>
         <div className="mt-2 flex justify-between text-xs text-[#6D675F]">
-          <span>{percent}% used</span>
+          <span>
+            {Math.round(spentPercent)}% used
+            {activeUpcoming > 0
+              ? ` · ${Math.round(upcomingPercent)}% scheduled`
+              : ""}
+          </span>
           <button
             type="button"
             onClick={() => {
