@@ -536,6 +536,38 @@ export default function ExpenseForm() {
         </div>
       )}
 
+      {items.length > 0 && (
+        <div className="sticky top-2 z-30 space-y-2 rounded-[24px] bg-[#fbf8f3]/95 p-2 shadow-[0_10px_30px_rgba(31,31,31,.08)] backdrop-blur md:static md:bg-transparent md:p-0 md:shadow-none">
+          {saveError && (
+            <div
+              aria-live="assertive"
+              className="rounded-[18px] border border-red-200 bg-red-50 p-3 text-sm leading-5 text-red-700"
+              role="alert"
+            >
+              {saveError}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={isSaving}
+            aria-busy={isSaving}
+            className="flex w-full touch-manipulation items-center justify-center gap-2 rounded-full bg-[#1F1F1F] px-5 py-3.5 text-sm font-medium leading-6 text-white transition active:scale-[0.98] hover:opacity-90 disabled:cursor-wait disabled:opacity-70"
+          >
+            {isSaving && (
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            )}
+            {isSaving
+              ? "Saving expense…"
+              : recurringItemCount
+                ? `Save ${recurringItemCount} Subscription Schedule${
+                    recurringItemCount === 1 ? "" : "s"
+                  }`
+                : `Save ${items.length} Expense Item${items.length === 1 ? "" : "s"}`}
+          </button>
+        </div>
+      )}
+
       {items.length > 0 && analysisSummary && (
         <div className="rounded-[24px] border border-[#D7CFC2] bg-[#FBF8F3] p-4 text-sm leading-6 text-[#6D675F]">
           {analysisSummary}
@@ -789,37 +821,6 @@ export default function ExpenseForm() {
         </button>
       )}
 
-      {items.length > 0 && (
-        <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 mt-2 space-y-2 rounded-[24px] bg-[#fbf8f3]/95 p-2 shadow-[0_-10px_30px_rgba(31,31,31,.08)] backdrop-blur md:static md:bg-transparent md:p-0 md:shadow-none">
-          {saveError && (
-            <div
-              aria-live="assertive"
-              className="rounded-[18px] border border-red-200 bg-red-50 p-3 text-sm leading-5 text-red-700"
-              role="alert"
-            >
-              {saveError}
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={() => void handleSave()}
-            disabled={isSaving}
-            aria-busy={isSaving}
-            className="flex w-full touch-manipulation items-center justify-center gap-2 rounded-full bg-[#1F1F1F] px-5 py-3.5 text-sm font-medium leading-6 text-white transition active:scale-[0.98] hover:opacity-90 disabled:cursor-wait disabled:opacity-70"
-          >
-            {isSaving && (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-            )}
-            {isSaving
-              ? "Saving expense…"
-              : recurringItemCount
-                ? `Save ${recurringItemCount} Subscription Schedule${
-                    recurringItemCount === 1 ? "" : "s"
-                  }`
-                : `Save ${items.length} Expense Item${items.length === 1 ? "" : "s"}`}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
