@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 type GoalMode = "week" | "month";
 
@@ -13,9 +14,10 @@ type SpendingGoalDashboardProps = {
   netWorthImpact: number;
   weekUpcoming: number;
   monthUpcoming: number;
+  userId: string;
+  initialGoals: Record<GoalMode, number>;
 };
 
-const storageKey = "expense-spending-goals";
 const defaultGoals: Record<GoalMode, number> = {
   week: 300,
   month: 1200,
@@ -83,21 +85,6 @@ function getPeriodMeta(mode: GoalMode) {
   };
 }
 
-function readGoals() {
-  if (typeof window === "undefined") return defaultGoals;
-
-  try {
-    return {
-      ...defaultGoals,
-      ...(JSON.parse(window.localStorage.getItem(storageKey) || "{}") as Partial<
-        Record<GoalMode, number>
-      >),
-    };
-  } catch {
-    return defaultGoals;
-  }
-}
-
 export default function SpendingGoalDashboard({
   weekTotal,
   monthTotal,
@@ -106,22 +93,18 @@ export default function SpendingGoalDashboard({
   netWorthImpact,
   weekUpcoming,
   monthUpcoming,
+  userId,
+  initialGoals,
 }: SpendingGoalDashboardProps) {
   const [mode, setMode] = useState<GoalMode>("week");
-  const [goals, setGoals] = useState(defaultGoals);
+  const [goals, setGoals] = useState(initialGoals);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [draftGoals, setDraftGoals] = useState<Record<GoalMode, string>>({
-    week: String(defaultGoals.week),
-    month: String(defaultGoals.month),
+    week: String(initialGoals.week),
+    month: String(initialGoals.month),
   });
-
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setGoals(readGoals());
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
 
   const activeTotal = mode === "week" ? weekTotal : monthTotal;
   const activeUpcoming = mode === "week" ? weekUpcoming : monthUpcoming;
@@ -155,14 +138,27 @@ export default function SpendingGoalDashboard({
     [entryCount, estimatedValue, netWorthImpact],
   );
 
-  function saveGoal() {
+  async function saveGoal() {
     const nextGoals = {
       week: Math.max(Number(draftGoals.week || 0), 0) || defaultGoals.week,
       month: Math.max(Number(draftGoals.month || 0), 0) || defaultGoals.month,
     };
+    setIsSaving(true);
+    setSaveError("");
+    const { error } = await createClient().from("spending_goals").upsert({
+      user_id: userId,
+      weekly_goal: nextGoals.week,
+      monthly_goal: nextGoals.month,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) {
+      setSaveError(error.message);
+      setIsSaving(false);
+      return;
+    }
     setGoals(nextGoals);
-    window.localStorage.setItem(storageKey, JSON.stringify(nextGoals));
     setIsEditing(false);
+    setIsSaving(false);
   }
 
   return (
@@ -308,12 +304,14 @@ export default function SpendingGoalDashboard({
             </label>
           </div>
           <button
-            onClick={saveGoal}
+            onClick={() => void saveGoal()}
+            disabled={isSaving}
             type="button"
-            className="mt-3 w-full rounded-lg bg-[#1F1F1F] px-3 py-2 text-sm text-white"
+            className="mt-3 w-full rounded-lg bg-[#1F1F1F] px-3 py-2 text-sm text-white disabled:opacity-60"
           >
-            Save goals
+            {isSaving ? "Saving…" : "Save goals"}
           </button>
+          {saveError && <p className="mt-2 text-xs text-red-700">{saveError}</p>}
         </div>
       )}
 

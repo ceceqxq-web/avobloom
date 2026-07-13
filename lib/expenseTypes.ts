@@ -11,6 +11,7 @@ export const recurrenceFrequencies = ["none", "weekly", "monthly"] as const;
 export type RecurrenceFrequency = (typeof recurrenceFrequencies)[number];
 
 export type ExpenseInput = {
+  user_id?: string;
   merchant: string;
   item_name: string;
   purchase_price: number;
@@ -72,6 +73,7 @@ export type RecurringExpenseInput = Omit<
 };
 
 export type RecurringExpenseRecord = RecurringExpenseInput & {
+  user_id?: string;
   id: string;
   created_at?: string;
   last_generated_date?: string;

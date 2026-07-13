@@ -2,7 +2,9 @@ import AppLogo from "@/components/AppLogo";
 import ExpenseForm from "@/components/ExpenseForm";
 import SpendingGoalDashboard from "@/components/SpendingGoalDashboard";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
+import UserMenu from "@/components/UserMenu";
+import { redirect } from "next/navigation";
 import {
   ExpenseRecord,
   RecurringExpenseRecord,
@@ -97,6 +99,10 @@ function ArrowIcon() {
 }
 
 export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
   const { data } = await supabase
     .from("expenses")
     .select("*")
@@ -106,6 +112,11 @@ export default async function Home() {
     .from("recurring_expenses")
     .select("*")
     .eq("is_active", true);
+  const { data: goals } = await supabase
+    .from("spending_goals")
+    .select("weekly_goal, monthly_goal")
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   const expenses = (data || []) as ExpenseRecord[];
   const recurringExpenses = (recurringData || []) as RecurringExpenseRecord[];
@@ -158,10 +169,13 @@ export default async function Home() {
     <main className="app-shell min-h-screen text-[#1c2520]">
       <nav className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
         <AppLogo compact />
-        <div className="flex items-center gap-1 rounded-full border border-[#dfe5dd] bg-white/75 p-1 text-sm shadow-sm backdrop-blur">
-          <Link href="/" className="rounded-full bg-[#1f382b] px-4 py-2 text-white">Overview</Link>
-          <Link href="/expenses" className="rounded-full px-4 py-2 text-[#526057] transition hover:bg-[#eef2ed]">Ledger</Link>
-          <Link href="/reports" className="hidden rounded-full px-4 py-2 text-[#526057] transition hover:bg-[#eef2ed] sm:block">Reports</Link>
+        <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-1 rounded-full border border-[#dfe5dd] bg-white/75 p-1 text-sm shadow-sm backdrop-blur md:flex">
+            <Link href="/" className="rounded-full bg-[#1f382b] px-4 py-2 text-white">Overview</Link>
+            <Link href="/expenses" className="rounded-full px-4 py-2 text-[#526057] transition hover:bg-[#eef2ed]">Ledger</Link>
+            <Link href="/reports" className="rounded-full px-4 py-2 text-[#526057] transition hover:bg-[#eef2ed]">Reports</Link>
+          </div>
+          <UserMenu email={user.email || "Account"} />
         </div>
       </nav>
 
@@ -199,6 +213,11 @@ export default async function Home() {
               weekTotal={weekTotal}
               weekUpcoming={weekUpcoming}
               monthUpcoming={monthUpcoming}
+              userId={user.id}
+              initialGoals={{
+                week: Number(goals?.weekly_goal || 300),
+                month: Number(goals?.monthly_goal || 1200),
+              }}
             />
 
             <section className="rounded-[26px] bg-[#1f382b] p-6 text-[#f6f4ec] shadow-[0_20px_50px_rgba(31,56,43,.16)]">

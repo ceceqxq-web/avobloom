@@ -4,6 +4,13 @@ import {
   RecurringExpenseInput,
   RecurringExpenseRecord,
 } from "./expenseTypes";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+async function getUserId(client: SupabaseClient = supabase) {
+  const { data: { user }, error } = await client.auth.getUser();
+  if (error || !user) throw new Error("Please sign in before changing expenses.");
+  return user.id;
+}
 
 function toLegacyExpense(expense: ExpenseInput) {
   return {
@@ -37,20 +44,24 @@ export function isMissingRecurringExpensesTableError(message?: string) {
 }
 
 export async function createExpense(expense: ExpenseInput) {
-  const result = await supabase.from("expenses").insert(expense);
+  const userId = await getUserId();
+  const ownedExpense = { ...expense, user_id: userId };
+  const result = await supabase.from("expenses").insert(ownedExpense);
 
   if (isMissingColumnError(result.error?.message)) {
-    return await supabase.from("expenses").insert(toLegacyExpense(expense));
+    return await supabase.from("expenses").insert(toLegacyExpense(ownedExpense));
   }
 
   return result;
 }
 
 export async function createExpenses(expenses: ExpenseInput[]) {
-  const result = await supabase.from("expenses").insert(expenses);
+  const userId = await getUserId();
+  const ownedExpenses = expenses.map((expense) => ({ ...expense, user_id: userId }));
+  const result = await supabase.from("expenses").insert(ownedExpenses);
 
   if (isMissingColumnError(result.error?.message)) {
-    return await supabase.from("expenses").insert(expenses.map(toLegacyExpense));
+    return await supabase.from("expenses").insert(ownedExpenses.map(toLegacyExpense));
   }
 
   return result;
@@ -70,6 +81,7 @@ function addFrequency(dateValue: string, frequency: RecurringExpenseRecord["recu
 
 function toExpenseFromRecurring(recurring: RecurringExpenseRecord): ExpenseInput {
   return {
+    user_id: recurring.user_id,
     merchant: recurring.merchant,
     item_name: recurring.item_name,
     purchase_price: recurring.purchase_price,
@@ -93,8 +105,10 @@ function toExpenseFromRecurring(recurring: RecurringExpenseRecord): ExpenseInput
 
 export async function createRecurringExpenses(recurringExpenses: RecurringExpenseInput[]) {
   if (!recurringExpenses.length) return { error: null };
-
-  const result = await supabase.from("recurring_expenses").insert(recurringExpenses);
+  const userId = await getUserId();
+  const result = await supabase
+    .from("recurring_expenses")
+    .insert(recurringExpenses.map((expense) => ({ ...expense, user_id: userId })));
 
   if (result.error) {
     if (isMissingRecurringExpensesTableError(result.error.message)) {
@@ -114,9 +128,9 @@ export async function createRecurringExpenses(recurringExpenses: RecurringExpens
   return await materializeDueRecurringExpenses();
 }
 
-export async function materializeDueRecurringExpenses() {
+export async function materializeDueRecurringExpenses(client: SupabaseClient = supabase) {
   const today = new Date().toISOString().slice(0, 10);
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("recurring_expenses")
     .select("*")
     .eq("is_active", true)
@@ -141,10 +155,10 @@ export async function materializeDueRecurringExpenses() {
     }
 
     if (dueExpenses.length) {
-      const { error: insertError } = await createExpenses(dueExpenses);
+      const { error: insertError } = await client.from("expenses").insert(dueExpenses);
       if (insertError) return { error: insertError };
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await client
         .from("recurring_expenses")
         .update({
           last_generated_date: dueExpenses[dueExpenses.length - 1].expense_date,

@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import AppLogo from "@/components/AppLogo";
 import { ExpenseRecord, calculateNetWorthImpact } from "@/lib/expenseTypes";
 import { getMeaningfulItemName } from "@/lib/expenseDisplay";
+import UserMenu from "@/components/UserMenu";
 
 type GroupedEntry = {
   name: string;
@@ -280,7 +281,13 @@ function getGroupAccent(index: number) {
   return accents[index % accents.length];
 }
 
-export default function ReportExplorer({ records }: { records: ExpenseRecord[] }) {
+export default function ReportExplorer({
+  records,
+  userEmail,
+}: {
+  records: ExpenseRecord[];
+  userEmail: string;
+}) {
   const [openPrimary, setOpenPrimary] = useState<string[]>([]);
   const [openSecondary, setOpenSecondary] = useState<string[]>([]);
 
@@ -373,8 +380,9 @@ export default function ReportExplorer({ records }: { records: ExpenseRecord[] }
   return (
     <main className="min-h-screen bg-[#F7F5F1] px-5 py-7 text-[#22211F] sm:px-6">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-7">
+        <div className="mb-7 flex items-center justify-between gap-4">
           <AppLogo compact />
+          <UserMenu email={userEmail} />
         </div>
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>

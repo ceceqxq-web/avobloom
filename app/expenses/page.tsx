@@ -2,13 +2,18 @@ import AppLogo from "@/components/AppLogo";
 import ExpensesTable from "./ExpensesTable";
 import UpcomingRecurringCosts from "./UpcomingRecurringCosts";
 import { materializeDueRecurringExpenses } from "@/lib/expenseService";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 import { ExpenseRecord, RecurringExpenseRecord } from "@/lib/expenseTypes";
+import UserMenu from "@/components/UserMenu";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function ExpensesPage() {
-  await materializeDueRecurringExpenses();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  await materializeDueRecurringExpenses(supabase);
 
   const { data: expenses, error } = await supabase
     .from("expenses")
@@ -27,8 +32,9 @@ export default async function ExpensesPage() {
   return (
     <main className="min-h-screen bg-[#F7F5F1] px-6 py-8 text-[#22211F]">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-7">
+        <div className="mb-7 flex items-center justify-between gap-4">
           <AppLogo compact />
+          <UserMenu email={user.email || "Account"} />
         </div>
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
