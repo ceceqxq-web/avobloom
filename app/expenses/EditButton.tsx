@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
-import { updateExpense } from "@/lib/expenseService";
 import { revalidateExpenseViews } from "@/lib/revalidateExpenses";
 import {
   ExpenseRecord,
@@ -109,30 +108,35 @@ export default function EditButton({
       value > 0 && financialType === "expense" ? "value_asset" : financialType;
     setIsSaving(true);
 
-    const { error } = await updateExpense(expense.id, {
-      merchant,
-      item_name: itemName,
-      purchase_price: Number(price || 0),
-      expense_date: expenseDate,
-      category,
-      financial_type: nextFinancialType,
-      current_estimated_value: value,
-      net_worth_impact: calculateNetWorthImpact(nextFinancialType, value),
-      brand,
-      brand_positioning: brandPositioning,
-      consumption_rate: Number(consumptionRate || 1),
-      market_price_low: Number(marketPriceLow || 0),
-      market_price_high: Number(marketPriceHigh || 0),
-      price_confidence: Number(priceConfidence || 0),
-      price_estimate_source: priceEstimateSource,
-      price_reasoning: priceReasoning,
-      ai_confidence: expense.ai_confidence || 0,
-      ai_summary: aiSummary,
+    const response = await fetch(`/api/expenses/${expense.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        merchant,
+        item_name: itemName,
+        purchase_price: Number(price || 0),
+        expense_date: expenseDate,
+        category,
+        financial_type: nextFinancialType,
+        current_estimated_value: value,
+        net_worth_impact: calculateNetWorthImpact(nextFinancialType, value),
+        brand,
+        brand_positioning: brandPositioning,
+        consumption_rate: Number(consumptionRate || 1),
+        market_price_low: Number(marketPriceLow || 0),
+        market_price_high: Number(marketPriceHigh || 0),
+        price_confidence: Number(priceConfidence || 0),
+        price_estimate_source: priceEstimateSource,
+        price_reasoning: priceReasoning,
+        ai_confidence: expense.ai_confidence || 0,
+        ai_summary: aiSummary,
+      }),
     });
+    const result = await response.json() as { ok: boolean; error?: string };
 
-    if (error) {
+    if (!response.ok || !result.ok) {
       setIsSaving(false);
-      alert(error.message);
+      alert(result.error || "The expense could not be updated.");
       return;
     }
 

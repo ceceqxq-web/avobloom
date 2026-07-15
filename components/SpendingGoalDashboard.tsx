@@ -11,7 +11,6 @@ type SpendingGoalDashboardProps = {
   monthTotal: number;
   entryCount: number;
   estimatedValue: number;
-  netWorthImpact: number;
   weekUpcoming: number;
   monthUpcoming: number;
   userId: string;
@@ -90,7 +89,6 @@ export default function SpendingGoalDashboard({
   monthTotal,
   entryCount,
   estimatedValue,
-  netWorthImpact,
   weekUpcoming,
   monthUpcoming,
   userId,
@@ -133,9 +131,8 @@ export default function SpendingGoalDashboard({
     () => [
       ["Entries", String(entryCount)],
       ["Value", formatMoney(estimatedValue)],
-      ["Net impact", formatMoney(netWorthImpact)],
     ],
-    [entryCount, estimatedValue, netWorthImpact],
+    [entryCount, estimatedValue],
   );
 
   async function saveGoal() {
@@ -315,7 +312,7 @@ export default function SpendingGoalDashboard({
         </div>
       )}
 
-      <div className="mt-2 grid grid-cols-3 gap-2">
+      <div className="mt-2 grid grid-cols-2 gap-2">
         {stats.map(([label, value]) => (
           <div key={label} className="rounded-lg bg-white/60 p-2.5">
             <div className="text-xs text-[#6D675F]">{label}</div>

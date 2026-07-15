@@ -2,6 +2,7 @@ import AppLogo from "@/components/AppLogo";
 import ExpenseForm from "@/components/ExpenseForm";
 import PurchaseAgent from "@/components/PurchaseAgent";
 import SpendingGoalDashboard from "@/components/SpendingGoalDashboard";
+import SmartShoppingList, { type ShoppingSuggestion } from "@/components/SmartShoppingList";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import UserMenu from "@/components/UserMenu";
@@ -9,7 +10,6 @@ import { redirect } from "next/navigation";
 import {
   ExpenseRecord,
   RecurringExpenseRecord,
-  calculateNetWorthImpact,
 } from "@/lib/expenseTypes";
 
 export const dynamic = "force-dynamic";
@@ -99,6 +99,28 @@ function ArrowIcon() {
   );
 }
 
+function buildShoppingSuggestions(expenses: ExpenseRecord[]): ShoppingSuggestion[] {
+  const replenishable = /^(Food & Drink|Home|Shopping)/i;
+  const seen = new Set<string>();
+  const now = Date.now();
+
+  return expenses.flatMap((expense) => {
+    const name = expense.item_name?.trim();
+    const key = `${name?.toLowerCase()}|${expense.merchant?.toLowerCase()}`;
+    if (!name || seen.has(key) || !replenishable.test(expense.category || "")) return [];
+    const ageDays = Math.floor((now - getExpenseDate(expense).getTime()) / 86_400_000);
+    if (ageDays < 7) return [];
+    seen.add(key);
+    return [{
+      id: expense.id,
+      itemName: name,
+      merchant: expense.merchant || "",
+      unitPrice: Number(expense.purchase_price || 0),
+      reason: `${ageDays} 天前购买`,
+    }];
+  }).slice(0, 5);
+}
+
 export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -150,11 +172,6 @@ export default async function Home() {
     (sum, item) => sum + Number(item.current_estimated_value || 0),
     0,
   );
-  const netWorthImpact = expenses.reduce(
-    (sum, item) =>
-      sum + calculateNetWorthImpact(item.financial_type, Number(item.current_estimated_value || 0)),
-    0,
-  );
   const categoryTotals = new Map<string, number>();
   monthExpenses.forEach((item) => {
     const category = categoryName(item.category);
@@ -164,6 +181,7 @@ export default async function Home() {
   const maxCategory = Math.max(...topCategories.map(([, value]) => value), 1);
   const topCategory = topCategories[0];
   const recentExpenses = expenses.slice(0, 4);
+  const shoppingSuggestions = buildShoppingSuggestions(expenses);
   const monthLabel = new Intl.DateTimeFormat("en-AU", { month: "long" }).format(now);
 
   return (
@@ -210,7 +228,6 @@ export default async function Home() {
               entryCount={expenses.length}
               estimatedValue={estimatedValue}
               monthTotal={monthTotal}
-              netWorthImpact={netWorthImpact}
               weekTotal={weekTotal}
               weekUpcoming={weekUpcoming}
               monthUpcoming={monthUpcoming}
@@ -236,6 +253,10 @@ export default async function Home() {
               </Link>
             </section>
           </aside>
+        </div>
+
+        <div className="mt-5">
+          <SmartShoppingList suggestions={shoppingSuggestions} />
         </div>
 
         <div className="mt-5">
