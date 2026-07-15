@@ -129,6 +129,38 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["spending_goals"]["Insert"]>;
         Relationships: [];
       };
+      purchase_orders: {
+        Row: {
+          id: string;
+          created_at: string;
+          user_id: string;
+          item_name: string;
+          merchant: string;
+          product_url: string | null;
+          quantity: number;
+          unit_price: number;
+          total_price: number;
+          delivery_notes: string | null;
+          status: "confirmed_pending_fulfilment" | "submitted_to_merchant" | "completed" | "cancelled";
+          confirmed_at: string;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          user_id: string;
+          item_name: string;
+          merchant: string;
+          product_url?: string | null;
+          quantity: number;
+          unit_price: number;
+          total_price: number;
+          delivery_notes?: string | null;
+          status?: "confirmed_pending_fulfilment" | "submitted_to_merchant" | "completed" | "cancelled";
+          confirmed_at: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["purchase_orders"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

@@ -1,5 +1,6 @@
 import AppLogo from "@/components/AppLogo";
 import ExpenseForm from "@/components/ExpenseForm";
+import PurchaseAgent from "@/components/PurchaseAgent";
 import SpendingGoalDashboard from "@/components/SpendingGoalDashboard";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
@@ -235,6 +236,10 @@ export default async function Home() {
               </Link>
             </section>
           </aside>
+        </div>
+
+        <div className="mt-5">
+          <PurchaseAgent />
         </div>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[.85fr_1.15fr]">

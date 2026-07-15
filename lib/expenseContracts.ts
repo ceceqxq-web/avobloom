@@ -24,7 +24,7 @@ export type SaveExpensesErrorCode =
 
 export type SaveExpensesResponse =
   | { ok: true }
-  | { ok: false; code: SaveExpensesErrorCode };
+  | { ok: false; code: SaveExpensesErrorCode; detail?: string };
 
 export const saveExpensesErrorMessages: Record<SaveExpensesErrorCode, string> = {
   UNAUTHENTICATED: "Your login session has expired. Please sign in again.",

@@ -16,6 +16,103 @@ const financialTypes = new Set([
   "investment",
 ]);
 
+const optionalExpenseColumns = new Set([
+  "brand",
+  "brand_positioning",
+  "consumption_rate",
+  "market_price_low",
+  "market_price_high",
+  "price_confidence",
+  "price_estimate_source",
+  "price_reasoning",
+  "ai_confidence",
+  "ai_summary",
+  "current_estimated_value",
+  "net_worth_impact",
+]);
+
+const optionalRecurringExpenseColumns = new Set([
+  "brand",
+  "brand_positioning",
+  "consumption_rate",
+  "market_price_low",
+  "market_price_high",
+  "price_confidence",
+  "price_estimate_source",
+  "price_reasoning",
+  "ai_confidence",
+  "ai_summary",
+  "current_estimated_value",
+]);
+
+function missingSchemaColumn(message: string) {
+  return message.match(/Could not find the '([^']+)' column/i)?.[1];
+}
+
+async function insertExpensesWithLegacySchema(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  rows: TablesInsert<"expenses">[],
+) {
+  let payload = rows.map((row) => ({ ...row }));
+
+  for (let attempt = 0; attempt <= optionalExpenseColumns.size; attempt += 1) {
+    const result = await supabase.from("expenses").insert(payload);
+    if (!result.error) return result;
+
+    const missingColumn = missingSchemaColumn(result.error.message);
+    if (
+      result.error.code !== "PGRST204" ||
+      !missingColumn ||
+      !optionalExpenseColumns.has(missingColumn)
+    ) {
+      return result;
+    }
+
+    console.warn("Retrying expense insert without unavailable optional column", {
+      column: missingColumn,
+    });
+    payload = payload.map((row) => {
+      const next = { ...row } as Record<string, unknown>;
+      delete next[missingColumn];
+      return next as TablesInsert<"expenses">;
+    });
+  }
+
+  return supabase.from("expenses").insert(payload);
+}
+
+async function insertRecurringExpensesWithLegacySchema(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  rows: TablesInsert<"recurring_expenses">[],
+) {
+  let payload = rows.map((row) => ({ ...row }));
+
+  for (let attempt = 0; attempt <= optionalRecurringExpenseColumns.size; attempt += 1) {
+    const result = await supabase.from("recurring_expenses").insert(payload);
+    if (!result.error) return result;
+
+    const missingColumn = missingSchemaColumn(result.error.message);
+    if (
+      result.error.code !== "PGRST204" ||
+      !missingColumn ||
+      !optionalRecurringExpenseColumns.has(missingColumn)
+    ) {
+      return result;
+    }
+
+    console.warn("Retrying recurring expense insert without unavailable optional column", {
+      column: missingColumn,
+    });
+    payload = payload.map((row) => {
+      const next = { ...row } as Record<string, unknown>;
+      delete next[missingColumn];
+      return next as TablesInsert<"recurring_expenses">;
+    });
+  }
+
+  return supabase.from("recurring_expenses").insert(payload);
+}
+
 function isOptionalString(value: unknown) {
   return value === undefined || value === null || typeof value === "string";
 }
@@ -80,6 +177,15 @@ function classifyWriteError(code: string | undefined): SaveExpensesErrorCode {
   if (code === "PGRST204" || code === "PGRST205") return "SCHEMA_OUTDATED";
   if (code === "42501") return "PERMISSION_DENIED";
   return "DATABASE_WRITE_FAILED";
+}
+
+function safeWriteErrorDetail(code: string | undefined, message: string) {
+  const missingColumn = missingSchemaColumn(message);
+  if (missingColumn) return `Database column “${missingColumn}” is not available yet.`;
+  if (code === "23514") return "One of the analyzed values is outside the database's allowed range.";
+  if (code === "23502") return "The database requires a field that is missing from this expense.";
+  if (code === "42501") return "The signed-in account does not have permission to insert this row.";
+  return `Database rejected the save (code ${code || "unknown"}).`;
 }
 
 function isSaveExpensesRequest(value: unknown): value is SaveExpensesRequest {
@@ -184,18 +290,18 @@ export async function POST(request: Request) {
 
   const [expenseResult, recurringResult] = await Promise.all([
     body.expenses.length
-      ? supabase
-          .from("expenses")
-          .insert(body.expenses.map((expense) => toExpenseInsert(expense, user.id)))
+      ? insertExpensesWithLegacySchema(
+          supabase,
+          body.expenses.map((expense) => toExpenseInsert(expense, user.id)),
+        )
       : Promise.resolve({ error: null }),
     body.recurringExpenses.length
-      ? supabase
-          .from("recurring_expenses")
-          .insert(
-            body.recurringExpenses.map((expense) =>
-              toRecurringExpenseInsert(expense, user.id),
-            ),
-          )
+      ? insertRecurringExpensesWithLegacySchema(
+          supabase,
+          body.recurringExpenses.map((expense) =>
+            toRecurringExpenseInsert(expense, user.id),
+          ),
+        )
       : Promise.resolve({ error: null }),
   ]);
   const error = expenseResult.error || recurringResult.error;
@@ -203,7 +309,11 @@ export async function POST(request: Request) {
   if (error) {
     console.error("Expense save failed", { code: error.code, message: error.message });
     return Response.json(
-      { ok: false, code: classifyWriteError(error.code) } satisfies SaveExpensesResponse,
+      {
+        ok: false,
+        code: classifyWriteError(error.code),
+        detail: safeWriteErrorDetail(error.code, error.message),
+      } satisfies SaveExpensesResponse,
       { status: 500 },
     );
   }

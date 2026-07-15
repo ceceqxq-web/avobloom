@@ -370,7 +370,7 @@ export default function ExpenseForm() {
         setSaveError(
           result.ok
             ? saveExpensesErrorMessages.DATABASE_WRITE_FAILED
-            : saveExpensesErrorMessages[result.code],
+            : `${saveExpensesErrorMessages[result.code]}${result.detail ? ` ${result.detail}` : ""}`,
         );
         return;
       }
