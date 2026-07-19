@@ -1,97 +1,41 @@
 @import "tailwindcss";
 
-:root {
-  --background: #f2f4ee;
-  --foreground: #1c2520;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  margin: 0;
-}
-
-::selection {
-  background: #c55f38;
-  color: white;
-}
-
-button,
-a,
-input,
-textarea,
-select {
-  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease,
-    box-shadow 160ms ease, transform 160ms ease;
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  outline: 3px solid rgba(197, 95, 56, 0.28);
-  outline-offset: 2px;
-}
-
-.app-shell {
-  background:
-    radial-gradient(circle at 88% 4%, rgba(216, 230, 214, 0.9), transparent 26rem),
-    radial-gradient(circle at 5% 36%, rgba(245, 220, 201, 0.55), transparent 28rem),
-    #f2f4ee;
-}
-
-.eyebrow {
-  color: #68766d;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.feature-card {
-  position: relative;
-}
-
-.feature-card::after {
-  background: #c55f38;
-  content: "";
-  height: 4px;
-  left: 28px;
-  position: absolute;
-  right: 28px;
-  top: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-.mobile-tab-bar {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-@media (max-width: 767px) {
-  body {
-    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
-  }
-
-  input,
-  textarea,
-  select {
-    font-size: 16px !important;
-  }
-}
+:root { --ink:#17231c; --muted:#747c76; --paper:#f4f3ee; --green:#274a39; --line:#dedfd9; }
+* { box-sizing:border-box; }
+body { margin:0; background:#d9ddd7; color:var(--ink); font-family:Arial,"PingFang SC",sans-serif; }
+button,textarea { font:inherit; }
+button { cursor:pointer; }
+.health-page { min-height:100vh; padding:24px; background:radial-gradient(circle at 50% 0,#edf0eb,#d9ddd7 72%); }
+.phone-app { width:min(100%,480px); min-height:calc(100vh - 48px); margin:auto; position:relative; overflow:hidden; padding:28px 24px 112px; background:var(--paper); box-shadow:0 26px 80px #26382c2b; border-radius:34px; }
+.health-header,.section-title,.composer-actions,.bottom-nav,.entry,.summary-grid,.suggestions article { display:flex; align-items:center; }
+.health-header { justify-content:space-between; }
+.brand { margin:0 0 3px; color:#577061; font-size:10px; font-weight:800; letter-spacing:.28em; }
+.hello { margin:0; font-size:13px; color:var(--muted); }
+.avatar { width:38px;height:38px;border:0;border-radius:50%;background:#dfe6df;color:var(--green);font-weight:700; }
+.hero-copy { margin:48px 0 28px; }
+.hero-copy p,.summary-heading p { margin:0 0 12px;color:#768178;font-size:14px; }
+.hero-copy h1,.summary-heading h1 { margin:0;font-family:Georgia,"Songti SC",serif;font-weight:500;font-size:40px;line-height:1.18;letter-spacing:-.045em; }
+.composer { padding:16px;border:1px solid #d8dbd4;border-radius:24px;background:#fff;box-shadow:0 12px 32px #28372d0b; }
+.composer textarea { width:100%;height:74px;resize:none;border:0;outline:0;color:var(--ink);font-size:16px;line-height:1.55; }
+.composer textarea::placeholder { color:#a1a7a2; }
+.composer-actions { justify-content:space-between; }
+.round-button,.send-button { border:0;border-radius:50%; }
+.round-button { width:34px;height:34px;margin-right:7px;background:#eff1ec;color:#556158; }
+.round-button.listening { color:#c25f4d;box-shadow:0 0 0 5px #c25f4d1a; }
+.send-button { width:38px;height:38px;background:var(--green);color:#fff;font-size:21px; }
+.photo-preview { width:100%;height:140px;margin-bottom:12px;object-fit:cover;border-radius:15px; }
+.ai-note { margin:14px 3px 32px;color:#778078;font-size:12px; }.ai-note span { margin-right:8px;color:#688670; }
+.section-title { justify-content:space-between;margin-bottom:12px; }.section-title h2 { margin:0;font-family:Georgia,"Songti SC",serif;font-size:21px;font-weight:500; }.section-title span { color:#8c928d;font-size:11px; }
+.entries { border-top:1px solid var(--line); }
+.entry { min-height:75px;border-bottom:1px solid var(--line);gap:12px; }
+.entry-icon { display:grid;place-items:center;width:34px;height:34px;flex:0 0 auto;border-radius:12px;background:#e7ece6;color:#355541;font-weight:700; }.entry-icon.meal{background:#f0e8dc;color:#8c6741}.entry-icon.weight{background:#e5e8ed;color:#536274}
+.entry h3,.suggestions h3 { margin:0 0 4px;font-size:14px;font-weight:600; }.entry p,.suggestions p { margin:0;color:#858c86;font-size:11px; }
+.entry-meta { margin-left:auto;text-align:right; }.entry-meta strong { display:block;font-family:Georgia,serif;font-size:16px; }.entry-meta small { color:#7d847f;font:10px Arial; }.entry-meta time { color:#9ba09b;font-size:9px; }
+.bottom-nav { position:absolute;left:0;right:0;bottom:0;height:84px;justify-content:space-around;border-top:1px solid #dcddd7;background:#f7f6f1eb;backdrop-filter:blur(14px); }
+.bottom-nav button { border:0;background:transparent;color:#929892;font-size:10px; }.bottom-nav button span { display:block;margin-bottom:5px;font-size:19px; }.bottom-nav button.active { color:var(--green);font-weight:700; }.bottom-nav .capture { width:52px;height:52px;border-radius:50%;background:var(--green);color:white;font-size:28px;box-shadow:0 8px 20px #274a3940; }
+.summary-page { padding-top:34px; }.summary-heading { margin-bottom:30px; }
+.summary-grid { flex-wrap:wrap;gap:10px; }.metric { width:calc(50% - 5px);min-height:150px;padding:18px;flex-direction:column;align-items:flex-start;border:1px solid var(--line);border-radius:22px;background:#fff; }.metric.dark { background:var(--green);color:white;border-color:var(--green); }.metric.wide { width:100%;min-height:128px; }.metric p { margin:0 0 17px;font-size:11px;opacity:.68; }.metric strong { font:38px Georgia,serif; }.metric small { font:12px Arial;opacity:.65; }.metric span { margin-top:auto;font-size:10px;opacity:.62; }.calorie-bar { width:100%;height:4px;margin:14px 0 7px;border-radius:4px;background:#e2e5df; }.calorie-bar i { display:block;width:58%;height:100%;border-radius:inherit;background:#b47655; }
+.insight-card { margin:18px 0;padding:22px;border-radius:22px;background:#e5ebe4; }.insight-label { color:#607668!important;font-size:10px!important;letter-spacing:.08em; }.insight-card h2 { margin:14px 0 10px;font:22px/1.35 Georgia,"Songti SC",serif; }.insight-card p { margin:0;color:#69746d;font-size:12px;line-height:1.7; }
+.suggestions article { min-height:64px;border-bottom:1px solid var(--line);gap:12px; }.suggestions article>span { display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#e4e8e1;color:#607266;font:12px Georgia; }.suggestions article button { margin-left:auto;border:0;background:transparent;color:#66736b;font-size:20px; }
+@media(max-width:520px){.health-page{padding:0}.phone-app{min-height:100vh;border-radius:0;box-shadow:none}.hero-copy{margin-top:42px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
