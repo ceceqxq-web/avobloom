@@ -1,3 +1,4 @@
+import {rawChickenBreast} from './chickenNutrition';
 import type {FoodNutrition} from './foodNutrition';
 import type {GardenFood} from './foodGarden';
 // Generic choices are estimates, not exact product matches. Edible weight excludes
@@ -14,7 +15,7 @@ const rows:[string,string,number,string,number,number,number,number,string][]=[
  ['pork-ribs','猪排骨（可食肉）',100,'约3小块可食肉 · 去骨生重',277,15.47,0,23.4,'USDA通用生猪排骨肉脂估算；不含骨头，数量约值，油酱另计'],
  ['pork-belly','猪五花肉',80,'约4片厚切 · 生重',1290/4.184,18.6,1,26.2,'参考Woolworths Pork Belly Thinly Sliced 488351每100g标签，作为同类估算，肥瘦差异大']
 ];
-export function kitchenMeats():GardenFood[]{return rows.map(([id,name,amount,caption,energyKcal,protein,carbs,fat,labelEvidence])=>{
+export function kitchenMeats():GardenFood[]{return [{id:rawChickenBreast.id,name:rawChickenBreast.name,label:rawChickenBreast,amount:100,caption:'1掌心份量 · 生重',frequency:0,icon:''},...rows.map(([id,name,amount,caption,energyKcal,protein,carbs,fat,labelEvidence])=>{
  const label:FoodNutrition={id:'garden-'+id,name,unit:'g',source:'通用估算',energyKcal,protein,carbs,fat,labelEvidence,importedAt:'',serving:{grams:amount,description:caption},marketDepartmentOverride:/clams|basa/.test(id)?'海鲜':'肉类'};
  return {id:label.id,name,label,amount,caption,frequency:0,icon:''};
-})}
+})]}

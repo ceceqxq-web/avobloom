@@ -17,3 +17,20 @@ test('selected pumpkin quantity is a total, not a per-tap instruction',()=>{
  assert.equal(marketPortionText(pumpkin,1),'1块（每次点选）');assert.equal(marketPortionText(pumpkin,4),'4块（已选合计）');
  const selected=gardenRecord(pumpkin,4,'2026-11-20','午餐');assert.equal(selected.amount,400);assert.equal(selected.energyKcal,104);
 });
+
+test('editing one serving persists grams and scales saved nutrition without changing serving count',async()=>{
+ const {withMarketServing}=await import('../lib/marketCatalog.ts');
+ const egg=gardenFoods([],[]).find(f=>f.id==='garden-egg');
+ const label=withMarketServing(egg,30);
+ const next=prepareMarketFoods(gardenFoods([],[label])).find(f=>f.id===egg.id);
+ assert.equal(next.amount,30);assert.equal(next.label.serving.quantitySource,'manual');
+ const record=gardenRecord(next,2,'2026-11-20','早餐');
+ assert.equal(record.servings,2);assert.equal(record.amount,60);assert.equal(record.energyKcal,93);assert.equal(record.portionSpec.amount,30);
+ assert.equal(egg.amount,50);
+ for(const invalid of [0,-1,NaN,Infinity,10001])assert.throws(()=>withMarketServing(egg,invalid));
+ const milk=gardenFoods([],[]).find(f=>f.id==='garden-milk');
+ assert.equal(withMarketServing(milk,200).serving.millilitres,200);assert.equal(withMarketServing(milk,200).serving.grams,null);
+ assert.throws(()=>withMarketServing({...egg,template:{weightUnknown:true}},30));
+});
+
+test('raw and cooked chicken breast remain distinct shelf choices',()=>{const foods=prepareMarketFoods(gardenFoods([],[]));const raw=foods.find(f=>f.id==='garden-chicken-raw'),cooked=foods.find(f=>f.id==='garden-chicken');assert.ok(raw);assert.ok(cooked);assert.match(raw.name,/生重/);assert.equal(raw.label.protein,22.5);assert.equal(cooked.label.protein,31);assert.notEqual(raw.id,cooked.id)});
