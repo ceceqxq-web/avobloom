@@ -1,14 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import {safeAuthNext} from "@/lib/health/authRedirect";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const requestedNext = searchParams.get("next") || "/";
-  const next =
-    requestedNext.startsWith("/") && !requestedNext.startsWith("//")
-      ? requestedNext
-      : "/";
+  const cookieStore=await cookies();
+  let storedNext='/';
+  try{storedNext=decodeURIComponent(cookieStore.get('avobloom-auth-next')?.value||'/')}catch{}
+  const next=safeAuthNext(searchParams.get('next')||storedNext);
+  cookieStore.delete('avobloom-auth-next');
 
   if (code) {
     const supabase = await createClient();

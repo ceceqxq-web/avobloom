@@ -1,0 +1,5 @@
+LXGW WenKai Regular
+Official source: https://github.com/lxgw/LxgwWenKai
+Downloaded from main/fonts/TTF/LXGWWenKai-Regular.ttf on 2026-11-17.
+Converted losslessly to WOFF2 using FontTools 4.68.0.
+License: SIL Open Font License 1.1, see OFL.txt.

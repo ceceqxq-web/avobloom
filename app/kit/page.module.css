@@ -1,0 +1,17 @@
+.page { min-height:100svh; background:#1e1e1d; color:#f1f0e9; padding:0 1.55% 32px; font-family:Arial,Helvetica,sans-serif; -webkit-font-smoothing:antialiased; }
+.hero { position:relative; display:flex; align-items:flex-start; min-height:clamp(285px,20.1vw,420px); padding:clamp(40px,3.1vw,72px) 2.7% 55px 23.5%; }
+.hero h1 { position:relative; margin:0; max-width:1500px; font-size:clamp(40px,4.45vw,100px); font-weight:900; line-height:1.09; letter-spacing:-.055em; }
+.hero h1 span { color:#3caff6; }
+.gears { position:absolute; left:-.4%; top:-32px; width:21%; max-width:450px; overflow:visible; }
+.grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1.2vw; margin:0 auto; max-width:2400px; }
+.card { min-width:0; padding:clamp(22px,1.55vw,40px); border-radius:12px; background:#323231; }
+.icon { width:clamp(84px,6vw,130px); height:clamp(84px,6vw,130px); margin:6px 0 28px; }
+.icon svg { width:100%; height:100%; }
+.card h2 { margin:0 0 13px; font-size:clamp(25px,1.6vw,36px); font-weight:750; letter-spacing:-.035em; line-height:1.15; }
+.card p { min-height:3em; margin:0; color:#d6d5ce; font-size:clamp(17px,1.26vw,28px); line-height:1.45; letter-spacing:-.025em; }
+.card ul { list-style:none; padding:27px 0 0; margin:37px 0 0; border-top:1px solid #41413e; }
+.card li { display:flex; align-items:flex-start; gap:17px; margin:0 0 19px; color:#d6d5ce; font-size:clamp(16px,1.25vw,27px); line-height:1.45; letter-spacing:-.028em; }
+.card li svg { width:25px; height:25px; flex-shrink:0; color:#35b1fc; margin-top:3px; }
+@media(min-width:1700px) { .card { min-height:870px; } .icon { margin-bottom:36px; } .card ul { padding-top:35px; } .card li { margin-bottom:21px; } }
+@media(max-width:1050px) { .page { padding:0 24px 24px; } .hero { padding:54px 0 55px 24%; min-height:270px; } .hero h1 { font-size:46px; } .gears { width:25%; top:12px; } .grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; } .card { padding:30px; } .card p { font-size:20px; } .card li { font-size:18px; } }
+@media(max-width:600px) { .page { padding:0 18px 24px; } .hero { padding:160px 4px 36px; min-height:0; } .gears { width:185px; left:-15px; top:-18px; } .hero h1 { font-size:42px; line-height:1.1; } .grid { grid-template-columns:1fr; gap:16px; } .card { padding:28px; } .icon { margin:0 0 24px; } .card h2 { font-size:28px; } .card p { min-height:0; } .card ul { margin-top:28px; padding-top:25px; } .card li:last-child { margin-bottom:0; } }

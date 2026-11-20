@@ -1,5 +1,2 @@
-import HealthCoachApp from "@/components/HealthCoachApp";
-
-export default function Home() {
-  return <HealthCoachApp />;
-}
+import HealthDashboard from "@/components/HealthDashboard";
+export default function Home() { return <HealthDashboard />; }

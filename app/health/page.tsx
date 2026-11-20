@@ -1,5 +1,2 @@
-import HealthCoachApp from "../../components/HealthCoachApp";
-
-export default function HealthPage() {
-  return <HealthCoachApp />;
-}
+import { redirect } from "next/navigation";
+export default function HealthPage() { redirect("/"); }

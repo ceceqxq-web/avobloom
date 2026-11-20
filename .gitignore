@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local private health database and backups
+/.health-data/
+
+# Local previews, exports and scratch artifacts
+/.ppt-build/
+/output/
+/outputs/
+/tmp/
+/*.jpg
+/*.jpeg
+/*.png
+/*.zip
+/*.pptx

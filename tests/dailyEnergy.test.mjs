@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {dailyEnergy} from '../lib/dailyEnergy.ts';import {remainingNutrition} from '../lib/mealPlanner.ts';
+const date='2026-10-30';
+const food={id:'food',date,type:'food',energyKcal:1535,protein:76.1,carbs:164.1,fat:59.9,amount:764};
+const exercise={id:'exercise',date,type:'exercise',energyKcal:300,amount:0};
+test('same-day exercise is deducted exactly once; screenshot shows 1235 net and 35 over',()=>{const balance=dailyEnergy([food,exercise],date,1200);assert.equal(balance.intake,1535);assert.equal(balance.burn,300);assert.equal(balance.net,1235);assert.equal(balance.over,35);assert.equal(balance.remaining,0)});
+test('other dates excluded; unknown exercise marked missing, never guessed',()=>{const balance=dailyEnergy([food,{...exercise,date:'2026-10-29'},{...exercise,id:'unknown',energyKcal:null}],date,1600);assert.equal(balance.burn,0);assert.equal(balance.remaining,65);assert.equal(balance.unknownExercise,1)});
+test('editing or removing exercise immediately updates remaining energy and menu fingerprint',()=>{const first=remainingNutrition(1800,[food,exercise],date),changed=remainingNutrition(1800,[food,{...exercise,energyKcal:400}],date),removed=remainingNutrition(1800,[food],date);assert.equal(first.target.calories,565);assert.equal(changed.target.calories,665);assert.equal(removed.target.calories,265);assert.notEqual(first.signature,changed.signature);assert.notEqual(first.signature,removed.signature);assert.equal(first.exerciseKcal,300);assert.ok(Math.abs(first.target.protein-13.9)<1e-8);assert.equal(first.target.protein,removed.target.protein)});
+test('negative net is retained as arithmetic rather than silently truncated',()=>{const balance=dailyEnergy([{...food,energyKcal:100},exercise],date,1200);assert.equal(balance.net,-200);assert.equal(balance.remaining,1400)});

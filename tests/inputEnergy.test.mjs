@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {inputEnergy} from '../lib/inputEnergy.ts';
+test('260kJ without per-piece marker is a total even with two cookies',()=>{const result=inputEnergy('2块香草cookie 标签是260kj热量',24,'g',2);assert.ok(Math.abs(result.kcal-62.141491)<.00001);assert.match(result.note,/合计/)});
+test('multiply only explicit per-piece energy, and prefer an explicit total',()=>{assert.ok(Math.abs(inputEnergy('2块饼干 每块260kJ',24,'g',2).kcal-124.28298)<.0001);assert.equal(inputEnergy('2块饼干 每块33大卡，合计66大卡',24,'g',2).kcal,66);assert.equal(inputEnergy('2块饼干33大卡',24,'g',2).kcal,33)});
+test('density uses measured portion; missing count or unit mismatch cannot be guessed',()=>{assert.equal(inputEnergy('25g饼干 每100g400大卡',25,'g',null).kcal,100);assert.throws(()=>inputEnergy('25g饼干 每块33大卡',25,'g',null));assert.throws(()=>inputEnergy('每100ml33大卡',25,'g',null));assert.equal(inputEnergy('2个鸡蛋',100,'g',2),null)});

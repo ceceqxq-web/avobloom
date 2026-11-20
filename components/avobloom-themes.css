@@ -1,0 +1,188 @@
+/* Layout owns the frame and padding. Illustration is decorative, never a stretched container. */
+.appearance-picker{display:flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid #b5bfa5;border-radius:12px;background:#fffaf0;color:#536b4b;font-size:13px;white-space:nowrap}
+.appearance-picker select{background:transparent;border:0;color:inherit;max-width:145px;padding:5px;cursor:pointer;font:inherit}
+.qh.qh-scenes[class*="avobloom-theme-"]{background:#fff8e9;color:#583d2a;--scene-border:#bda47e;--scene-shadow:#d7c3a1;--scene-paper:#fffbf0}
+.qh.qh-scenes.avobloom-theme-garden{--scene-border:#a5b477;--scene-shadow:#bac492;--scene-paper:#fffbed}
+.qh.qh-scenes.avobloom-theme-journal{--scene-border:#cbb69b;--scene-shadow:#e7d7c1;--scene-paper:#fffaf0}
+.qh.qh-scenes .qh-top{position:relative;z-index:3}
+.qh.qh-scenes[class*="avobloom-theme-"] .qh-greeting{display:none}
+.qh.qh-scenes[class*="avobloom-theme-"] .qh-content{padding:16px 32px 100px;max-width:1500px;margin:auto}
+.qh.qh-scenes[class*="avobloom-theme-"] .cream-studio{border:0;box-shadow:none;background:transparent;padding:0;margin:10px 0;overflow:visible}
+.qh.qh-scenes :is(.painted-roses,.grove-footer-vine,.cream-seal){display:none}
+.qh.qh-scenes .cream-title{display:flex;flex-direction:column;position:relative;gap:0;padding:0!important;min-height:0;background:transparent;border:0;border-radius:0;box-shadow:none;overflow:visible;margin:0 0 18px;isolation:isolate}
+.qh.qh-scenes .cream-title::before,.qh.qh-scenes .cream-title::after,.qh.qh-scenes .cream-title>div::after{display:none}
+.qh.qh-scenes .cream-title>div{max-width:none}
+.qh.qh-scenes .cream-title>div:not(.poster-hero-art){order:-1;text-align:center;padding:0;margin:0;position:relative;z-index:1}
+.qh.qh-scenes .cream-title h2{font-size:32px;color:#532c20;line-height:1.2;letter-spacing:0;margin:4px 0}
+.qh.qh-scenes .cream-title p{font-size:12px;color:#755e47}
+.qh.qh-scenes .cream-title .fg-kicker{font-size:9px;letter-spacing:2px}
+.poster-hero-art{height:250px;width:100%;max-width:700px;position:relative;margin:0 auto;mix-blend-mode:darken}
+.poster-hero-art>svg{width:100%;height:100%;display:block}
+.qh.qh-scenes .cream-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:stretch}
+.qh.qh-scenes .cream-kitchen{display:contents}
+.qh.qh-scenes .poster-module{position:relative!important;isolation:isolate;min-width:0;width:100%;box-sizing:border-box;border:2px solid var(--scene-border);background:var(--scene-paper);border-radius:24px;box-shadow:0 4px 0 var(--scene-shadow),0 8px 14px #77603d10;outline:0;padding:24px;min-height:220px;margin:0;top:auto;overflow:visible}
+.qh.qh-scenes .poster-module>:not(.poster-module-trim){position:relative;z-index:1}
+.qh.qh-scenes .cream-weigh{grid-column:1;grid-row:1}
+.qh.qh-scenes .cream-day-summary{grid-column:2;grid-row:1}
+.qh.qh-scenes .poster-records{grid-column:1;grid-row:2}
+.qh.qh-scenes .poster-meals{grid-column:2;grid-row:2;display:flex;flex-direction:column;justify-content:center;gap:12px;letter-spacing:0}
+.qh.qh-scenes .poster-food-stage{grid-column:1/-1;min-width:0}
+.qh.qh-scenes .poster-module h3{font-size:16px;font-weight:600;text-align:center;color:#583d2a;margin:0 0 10px}
+/* The four information modules use thin frames, not serving trays with handles. */
+.qh.qh-scenes.avobloom-theme-workbench .poster-module{border:8px solid #c29a6e;border-radius:23px;background:linear-gradient(110deg,#fff9ed,#fbf2e2);box-shadow:inset 0 0 0 2px #ecdbc0,0 3px 0 #9f7853,0 7px 14px #72502d19}
+.qh.qh-scenes.avobloom-theme-garden .poster-module{border-radius:35px 27px 31px 25px;border-width:3px;box-shadow:0 4px 0 #adb980,0 8px 0 #d4c6a5}
+.qh.qh-scenes.avobloom-theme-journal .poster-module{border-radius:12px 24px 15px 20px;border:1px solid #cbb69b;box-shadow:3px 4px 0 #ecdfcb,5px 7px 0 #fff9ee,6px 8px 0 #d7c8b2}
+.qh.qh-scenes.avobloom-theme-journal .poster-module::before,.qh.qh-scenes.avobloom-theme-journal .poster-module::after{content:'';position:absolute;width:44px;height:15px;top:-6px;left:14px;background:#ebc5a7ad;transform:rotate(-14deg);pointer-events:none;z-index:2}
+.qh.qh-scenes.avobloom-theme-journal .poster-module::after{left:auto;right:14px;transform:rotate(14deg);background:#e7b6ac99}
+.poster-module-trim{position:absolute;inset:0;pointer-events:none;z-index:0;display:none}
+.avobloom-theme-garden .poster-module-trim{display:block}
+.module-grass-corner{position:absolute;width:43px;height:43px;overflow:hidden;mix-blend-mode:darken}
+.module-grass-corner svg{width:100%;height:100%}.corner-0{left:-9px;top:-9px}.corner-1{right:-9px;top:-9px}.corner-2{left:-9px;bottom:-9px}.corner-3{right:-9px;bottom:-9px}
+.qh.qh-scenes .cream-weigh .cream-section-title{justify-content:center;gap:14px;color:#684c36;font-size:13px}
+.poster-scale-details{margin:4px auto 10px;max-width:300px;text-align:center}
+.poster-scale-details>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;color:#563e29;padding:8px 0}
+.poster-scale-details>summary::-webkit-details-marker{display:none}
+.poster-scale-details>summary svg{height:42px;width:42px}
+.poster-scale-details>summary b{font-size:31px;font-weight:600;font-variant-numeric:tabular-nums}
+.poster-scale-details>summary b small{font-size:16px}
+.poster-scale-details>summary span{font-size:10px;flex-basis:100%;color:#917b60}
+.qh.qh-scenes .cream-studio .fg-weight{max-width:290px;padding:5px 0 0;margin:auto}
+.qh.qh-scenes .cream-studio .fg-scale{padding:5px 9px;border-radius:15px;box-shadow:none;border-width:3px}
+.qh.qh-scenes .cream-studio .fg-readout{padding:3px 9px;border-width:2px}
+.qh.qh-scenes .cream-studio .fg-readout input{font-size:29px!important}
+.qh.qh-scenes .cream-studio .fg-ruler{height:37px;margin-top:5px}
+.qh.qh-scenes .cream-studio .fg-weight-steps{margin:5px 0;gap:6px}
+.qh.qh-scenes .cream-studio .fg-weight-steps button{padding:3px;font-size:11px;min-height:24px}
+.qh.qh-scenes .cream-button{max-width:290px;display:block;margin:0 auto;padding:7px;border-radius:12px;font-size:12px;background:#899c72;color:#fffef5}
+.qh.qh-scenes .cream-message{min-height:0;font-size:10px;margin:7px 0 0;line-height:1.4}
+.qh.qh-scenes .cream-day-summary>header{margin:0 0 10px;display:flex;justify-content:center;color:#604630}
+.qh.qh-scenes .cream-day-summary>header b{font-size:16px}.qh.qh-scenes .cream-day-summary>header small{display:none}
+.qh.qh-scenes .cream-day-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;text-align:center;margin:0}
+.qh.qh-scenes .cream-day-values>div{gap:0;line-height:1.2;padding:0;margin:0;min-width:0}
+.qh.qh-scenes .cream-day-values .cream-day-energy{grid-column:1/-1;display:flex;flex-direction:row;align-items:baseline;justify-content:center;gap:6px}
+.qh.qh-scenes .cream-day-values .cream-day-energy strong{font-size:33px;color:#553526;line-height:1.1}
+.qh.qh-scenes .cream-day-values b{font-size:21px;color:#674c33;margin:3px 0;line-height:1.15}
+.qh.qh-scenes .cream-day-values span{font-size:12px;color:#685742}.qh.qh-scenes .cream-day-values small{font-size:10px;color:#89755d}
+.poster-daily-progress{margin:8px 0 0;font-size:10px;color:#846849;text-align:center}
+.poster-daily-progress>div{height:8px;background:#e6d9bf;border:1px solid #cab393;border-radius:10px;overflow:hidden;margin:5px 0}
+.poster-daily-progress i{display:block;height:100%;background:#eea17b;border-radius:10px}
+.poster-nutrition-note{font-size:9px;text-align:center;color:#8b785f;margin-top:5px}.poster-nutrition-note summary{cursor:pointer}.poster-nutrition-note p{margin:4px}
+/* Lists scroll inside their own padded frame; expansion never overlaps neighboring modules. */
+.qh.qh-scenes .poster-records .saved-food-tray{margin:0;padding:0;border:0;background:none;min-width:0}
+.qh.qh-scenes .poster-records .saved-food-tray>header{gap:5px;margin:0 0 8px;flex-wrap:wrap}
+.qh.qh-scenes .poster-records .saved-food-tray>header>b{display:none}
+.qh.qh-scenes .poster-records .saved-food-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));max-height:145px;overflow:auto;overscroll-behavior:contain;gap:6px;padding:2px;min-width:0}
+.qh.qh-scenes .poster-records .saved-food-strip.expanded{max-height:340px}
+.qh.qh-scenes .saved-food-thumb{min-width:0;box-sizing:border-box;overflow:hidden}
+.qh.qh-scenes .poster-records .saved-food-thumb{width:auto;padding:6px;background:#fffdf5;box-shadow:none;border:1px solid #d8c6a9;border-radius:10px;gap:6px}
+.qh.qh-scenes .poster-records .saved-food-thumb .watercolor-art{width:36px;height:36px;flex:0 0 36px}
+.qh.qh-scenes .poster-records .saved-food-thumb b{font-size:11px;color:#684a30}.qh.qh-scenes .poster-records .saved-food-thumb small{font-size:9px}.qh.qh-scenes .poster-records .saved-food-thumb strong{font-size:10px}
+.poster-empty{font-size:12px;text-align:center;color:#91765b}
+.qh.qh-scenes .poster-meals .cream-meal-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%;min-width:0}
+.qh.qh-scenes .poster-meals .cream-meal-picker button{box-sizing:border-box;min-width:0;width:auto;display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;padding:8px 3px;min-height:95px;border:1px solid #d7bfa0;background:#fff9ed;border-radius:18px;box-shadow:0 3px 0 #d8c1a1;color:#66482d;overflow:hidden}
+.qh.qh-scenes .poster-meals .cream-meal-picker button[aria-pressed=true]{background:#ffe3c1;border-color:#be8b56;box-shadow:inset 0 0 0 2px #fff4db,0 3px 0 #c39e70}
+.qh.qh-scenes .poster-meals .meal-card-art{width:47px;height:42px;flex:0 0 42px}.qh.qh-scenes .poster-meals .meal-card-art .watercolor-art{width:47px;height:42px}
+.qh.qh-scenes .poster-meals .meal-card-copy b{font-size:14px}.qh.qh-scenes .poster-meals .meal-card-copy small{font-size:9px}.qh.qh-scenes .poster-meals .meal-card-check{display:none}
+/* Plate image is one fixed-ratio canvas. Only the inset is allowed to contain food. */
+.qh.qh-scenes .poster-food-stage .food-garden{gap:10px}
+.qh.qh-scenes .cream-studio .contained-basket{display:flex;flex-direction:column;gap:14px;grid-column:auto;grid-row:auto;background:#fffaf0;border:2px solid var(--scene-border);border-radius:24px;box-shadow:0 3px 0 var(--scene-shadow);padding:18px;margin:0 0 12px;min-height:0;min-width:0;width:100%;box-sizing:border-box}
+.qh.qh-scenes .contained-basket>*{grid-area:auto!important;order:0;max-width:100%;min-width:0}
+.qh.qh-scenes .poster-platter-label{display:block;width:fit-content;margin:0 auto!important;padding:5px 22px;border:1px solid #cfb395;background:#fff2d7;box-shadow:0 3px 0 #e0c5a4;border-radius:20px;text-align:center;font-size:15px}
+.plate-viewport{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;border-radius:15px;scrollbar-width:thin}
+.plate-viewport:focus-visible{outline:2px solid #9eac80;outline-offset:2px}
+.plate-artboard{width:100%;min-width:860px;aspect-ratio:1536/341;position:relative;isolation:isolate}
+.platter-illustration{position:absolute;inset:0;pointer-events:none;z-index:0;mix-blend-mode:darken}.platter-illustration>svg{width:100%;height:100%;display:block}
+.qh.qh-scenes .cream-studio .plate-artboard .fg-plate{position:absolute;inset:22% 14% 22%;width:auto;height:auto;min-height:0;margin:0;padding:4px;display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-start;gap:9px;overflow-x:auto;overflow-y:hidden;border:0;border-radius:13px;background:none;box-shadow:none;box-sizing:border-box;scrollbar-width:thin;grid-area:auto}
+.qh.qh-scenes .plate-artboard .fg-plate .plate-food{width:94px;min-width:94px;max-width:94px;flex:0 0 94px;box-sizing:border-box;border:1px solid #dacbb2;border-radius:9px;background:#fffdf3;padding:3px;box-shadow:0 2px 0 #d9c9a8;overflow:hidden}
+.qh.qh-scenes .plate-artboard .plate-food-main{display:grid;grid-template-rows:32px 13px 12px 12px;gap:1px;width:100%;min-width:0;padding:0;background:none;border:0;align-items:center;justify-items:center}
+.qh.qh-scenes .plate-artboard .plate-food-main .watercolor-art{height:32px;width:50px;max-width:100%}
+.qh.qh-scenes .plate-artboard .plate-food-main b{font-size:10px;line-height:13px;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.qh.qh-scenes .plate-artboard .plate-food-main :is(span,small){font-size:9px;line-height:12px;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.qh.qh-scenes .plate-artboard .plate-food-tools{display:flex;gap:4px;justify-content:center;padding:2px 0 0;margin:0}
+.qh.qh-scenes .plate-artboard .plate-food-tools button{font-size:8px;min-height:16px;padding:1px 3px;border-radius:4px}
+.qh.qh-scenes .plate-artboard .fg-plate-empty{margin:auto;max-width:90%;font-size:11px;text-align:center}
+.qh.qh-scenes .plate-artboard .fg-plate-empty>span{font-size:25px}.qh.qh-scenes .plate-artboard .fg-plate-empty small{font-size:10px}
+.qh.qh-scenes .plate-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px 18px;align-items:center;padding:13px;border:1px solid #ddd0b9;background:#f9f1e1;border-radius:15px}
+.qh.qh-scenes .plate-actions>*{grid-area:auto!important;min-width:0;margin:0;max-width:none}
+.qh.qh-scenes .plate-actions .fg-draft-macros{font-size:11px;display:flex;flex-wrap:wrap;gap:4px 10px;grid-column:1;grid-row:1!important}
+.qh.qh-scenes .plate-actions .fg-summary{grid-column:1;grid-row:2!important;margin:0;font-size:12px}
+.qh.qh-scenes .plate-actions .fg-summary small{display:block;font-size:10px}
+.qh.qh-scenes .plate-actions .fg-save{grid-column:2;grid-row:1/3!important;min-width:170px;width:auto;min-height:42px;padding:10px 14px;font-size:13px}
+.qh.qh-scenes .plate-actions .plate-dropzone{grid-column:1/-1;grid-row:3!important;width:100%;min-height:38px;height:auto;margin:0;padding:7px 12px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:10px;border:1px dashed #b9bda1;border-radius:9px;background:#f0f2e2;box-sizing:border-box}
+.qh.qh-scenes .plate-actions .plate-dropzone small{font-size:9px}
+.qh.qh-scenes .plate-recorded-box:empty{display:none}
+.qh.qh-scenes .plate-recorded-box{padding:10px;border:1px solid #d8c8ae;border-radius:13px;background:#fffdf6;box-sizing:border-box;width:100%;min-width:0}
+.qh.qh-scenes .plate-recorded-box>.saved-food-tray{margin:0;padding:0;border:0;background:none}
+.qh.qh-scenes .plate-recorded-box .saved-food-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));max-height:145px;overflow:auto;gap:6px;padding:2px;min-width:0}
+.qh.qh-scenes .plate-recorded-box .saved-food-strip.expanded{max-height:340px}
+.qh.qh-scenes .plate-recorded-box .saved-food-thumb{width:auto;min-width:0;padding:5px;box-shadow:none}
+/* Shelf is a real rectangular board with inner gutters; it has no giant platter image. */
+.qh.qh-scenes .cream-studio .market-browser{position:relative;display:grid;grid-template-columns:140px minmax(0,1fr);gap:12px;border:2px solid var(--scene-border);border-radius:20px;background:var(--scene-paper);box-shadow:0 4px 0 var(--scene-shadow);padding:14px;margin:0;min-width:0;box-sizing:border-box;overflow:hidden}
+.qh.qh-scenes .market-browser .market-directory{border:1px solid #d2c0a0;background:#f3ecd9;border-radius:13px;padding:6px;box-shadow:none;min-width:0;height:calc(100dvh - 200px);min-height:380px;max-height:none;overflow:auto}
+.qh.qh-scenes .market-browser .market-directory button{min-height:48px;font-size:13px;padding:7px;box-sizing:border-box}
+.qh.qh-scenes .market-browser .market-aisles{border:0;background:none;box-shadow:none;border-radius:10px;padding:4px 8px 8px 4px;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:9px;align-content:start;align-items:start;height:calc(100dvh - 200px);min-height:380px;max-height:none;overflow:auto;min-width:0;box-sizing:border-box}
+.qh.qh-scenes .compact-market .fg-card-pick{grid-template-rows:80px 28px 23px 17px 13px}
+.qh.qh-scenes .cream-kitchen .compact-market .market-aisles .fg-art{height:80px!important}.qh.qh-scenes .compact-market .fg-art .watercolor-art{width:104px;height:78px;max-width:100%}
+.qh.qh-scenes .cream-studio .fg-tile{background:#fffaf0;border:1px solid #cdb18d;border-radius:12px;box-shadow:0 3px 0 #dfcaaa;padding:5px;min-width:0;box-sizing:border-box;overflow:hidden}
+.qh.qh-scenes .cream-studio .market-shelf[data-active=false] .fg-tile{filter:brightness(.94)saturate(.82);opacity:.9}.qh.qh-scenes .cream-studio .market-shelf[data-active=true] .fg-tile{box-shadow:inset 0 0 0 1px #e5c48b,0 2px 0 #c4ab80;background:#fffbeb}
+.qh.qh-scenes.avobloom-theme-workbench .market-browser{border-width:7px;border-color:#c29a6e;background:linear-gradient(90deg,#f5e3c8,#fff9e9 15%,#fff9e9 85%,#f5e3c8)}
+.qh.qh-scenes.avobloom-theme-journal .market-browser{border-style:dashed;box-shadow:3px 4px 0 #e7d6c2}
+.appearance-flowers{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}.appearance-flower{position:absolute;width:150px;height:150px;overflow:hidden;mix-blend-mode:multiply}.flower-0{top:0;left:0}.flower-1{top:0;right:0}.flower-2{left:0;bottom:0}.flower-3{right:0;bottom:0}
+.avobloom-theme-garden .appearance-flower{width:190px;height:190px}.avobloom-theme-garden :is(.flower-1,.flower-2){display:none}.avobloom-theme-workbench .appearance-flower{width:110px;height:110px}.avobloom-theme-workbench :is(.flower-1,.flower-2){display:none}.avobloom-theme-journal .appearance-flower{width:80px;height:80px}
+.workbench-garland{display:none}.avobloom-theme-workbench .workbench-garland{display:flex;position:absolute;top:100px;bottom:65px;width:65px;flex-direction:column;justify-content:space-around;align-items:center}.workbench-garland::before{content:'';position:absolute;top:0;bottom:0;left:50%;border-left:1px solid #879e8d}.workbench-garland svg{position:relative;display:block;width:85px;height:85px;transform:rotate(75deg);mix-blend-mode:multiply}.garland-left{left:-20px}.garland-right{right:-20px;transform:scaleX(-1)}
+@media(max-width:700px){.qh.qh-scenes[class*="avobloom-theme-"] .qh-content{padding:12px 16px 95px}.qh.qh-scenes .cream-layout{gap:16px}.qh.qh-scenes .cream-title h2{font-size:28px}.poster-hero-art{height:210px}.qh.qh-scenes .poster-module{padding:20px;min-height:200px}.qh.qh-scenes .cream-day-values b{font-size:18px}.qh.qh-scenes .poster-meals .cream-meal-picker{gap:5px}.qh.qh-scenes .poster-meals .cream-meal-picker button{min-height:80px}.qh.qh-scenes .poster-meals .meal-card-copy small{display:none}.qh.qh-scenes .poster-meals .meal-card-art,.qh.qh-scenes .poster-meals .meal-card-art .watercolor-art{height:34px;width:40px;flex-basis:34px}.qh.qh-scenes .poster-module h3{font-size:14px}.qh.qh-scenes .cream-studio .market-browser{grid-template-columns:75px minmax(0,1fr);padding:8px;gap:6px}.qh.qh-scenes .market-browser .market-aisles{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:3px 3px 6px}.qh.qh-scenes .market-browser .market-directory{padding:3px}.qh.qh-scenes .market-browser .market-directory button{font-size:10px;padding:4px;gap:3px}.qh.qh-scenes .market-browser .market-directory .aisle-icon{width:25px;flex-basis:25px}.qh.qh-scenes .market-browser .market-directory small{display:none}.qh.qh-scenes .appearance-flower{width:50px;height:50px;opacity:.8}.grove-tools{flex-wrap:wrap}.appearance-picker{font-size:11px}.avobloom-theme-workbench .workbench-garland{width:30px;opacity:.7}.workbench-garland svg{width:40px;height:40px}.garland-left{left:-12px}.garland-right{right:-12px}.qh.qh-scenes .cream-studio .contained-basket{padding:12px}.qh.qh-scenes .plate-actions{grid-template-columns:1fr;padding:10px}.qh.qh-scenes .plate-actions :is(.fg-draft-macros,.fg-summary,.fg-save,.plate-dropzone){grid-column:1;grid-row:auto!important;width:100%;min-width:0}.qh.qh-scenes .plate-actions .plate-dropzone{flex-wrap:wrap;gap:4px}.qh.qh-scenes .plate-recorded-box .saved-food-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.qh.qh-scenes .cream-layout{grid-template-columns:1fr}.qh.qh-scenes :is(.cream-weigh,.cream-day-summary,.poster-records,.poster-meals){grid-column:1;grid-row:auto}.qh.qh-scenes .poster-records .saved-food-strip{max-height:145px}.qh.qh-scenes .poster-records .saved-food-strip.expanded{max-height:340px}.qh.qh-scenes .cream-day-values span{font-size:11px}.qh.qh-scenes .cream-day-values small{font-size:9px}.qh.qh-scenes .cream-studio .fg-readout input{font-size:25px!important}.qh.qh-scenes .market-browser .market-aisles{grid-template-columns:repeat(2,minmax(0,1fr))}.qh.qh-scenes .compact-market .fg-card-pick{grid-template-rows:64px 30px 24px 17px 13px}.qh.qh-scenes .cream-kitchen .compact-market .market-aisles .fg-art{height:64px!important}.qh.qh-scenes .compact-market .fg-art .watercolor-art{height:62px;width:84px}.qh.qh-scenes .plate-artboard .fg-plate-empty small{font-size:11px}}
+/* Fixed card tracks prevent the scroll viewport from squeezing all rows into its height. */
+.qh.qh-scenes .market-browser .market-aisles{grid-template-rows:none;grid-auto-rows:222px}
+.qh.qh-scenes .market-browser .fg-tile{height:222px;max-height:222px}
+@media(max-width:600px){.qh.qh-scenes .market-browser .market-aisles{grid-auto-rows:210px}.qh.qh-scenes .market-browser .fg-tile{height:210px;max-height:210px}}
+.qh.qh-scenes .poster-module-trim{display:none}
+.qh.qh-scenes.avobloom-theme-garden .poster-module-trim{display:block}
+.qh.qh-scenes .cream-studio .contained-basket{align-items:stretch}
+.qh.qh-scenes .plate-actions{width:100%;box-sizing:border-box}
+.qh.qh-scenes .cream-studio .plate-artboard .fg-plate{inset:20% 14% 20%}
+.qh.qh-scenes .plate-artboard .plate-food-main{grid-template-rows:42px 13px 12px 12px}
+.qh.qh-scenes .plate-artboard .plate-food-main .watercolor-art{height:42px;width:58px}
+
+.plate-scroll-hint{display:none}
+.qh.qh-scenes .contained-basket .plate-scroll-hint{margin:-8px 0 0;text-align:center;font-size:10px;color:#927b5d}
+@media(max-width:900px){.plate-scroll-hint{display:block}}
+/* Categorized shelves: each category is an independent full-width row. */
+.qh.qh-scenes .cream-studio .market-browser{grid-template-columns:135px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;align-items:start}
+.qh.qh-scenes .market-browser>.market-directory{grid-column:1;grid-row:1;min-width:0;width:100%}
+.qh.qh-scenes .market-browser>.market-aisles{grid-column:2;grid-row:1;display:block!important;grid-template-rows:none;grid-auto-rows:auto;padding:4px 7px 10px}
+.qh.qh-scenes .compact-market .market-shelf{display:block!important;margin:0 0 10px;padding:0 0 4px;border:0;background:transparent;box-shadow:none;min-width:0;width:100%}
+.qh.qh-scenes .compact-market .market-shelf>header{display:flex!important;align-items:center;justify-content:space-between;gap:8px;min-height:28px;padding:5px 10px;margin:0 0 7px;border:1px solid #d7b68d;border-radius:9px;background:linear-gradient(0deg,#f0d9b6,#f9ead0);box-shadow:0 2px 0 #d5b48d}
+.qh.qh-scenes .compact-market .market-shelf>header>div{display:flex;align-items:baseline;gap:8px;min-width:0}
+.qh.qh-scenes .compact-market .market-shelf>header small{display:none}
+.qh.qh-scenes .compact-market .market-shelf>header h4{font-size:14px;line-height:1.2;margin:0;color:#72533a}
+.qh.qh-scenes .compact-market .market-shelf>header>span{font-size:10px;color:#8e7558}
+.qh.qh-scenes .cream-kitchen .compact-market .market-shelf>.fg-grid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));grid-auto-rows:178px;gap:7px;max-height:none;overflow:visible;margin:0;padding:0}
+.qh.qh-scenes .market-browser .fg-tile{height:178px;max-height:178px;padding:4px;min-width:0}
+.qh.qh-scenes .compact-market .fg-card-pick{grid-template-rows:52px 24px 22px 15px 11px;gap:0}
+.qh.qh-scenes .cream-kitchen .compact-market .market-aisles .fg-art{height:52px!important}
+.qh.qh-scenes .compact-market .fg-art .watercolor-art{width:78px;height:50px;max-width:100%}
+.qh.qh-scenes .compact-market .fg-card-pick b{font-size:11px;line-height:12px}
+.qh.qh-scenes .compact-market .fg-card-pick>.market-portion{font-size:9px;line-height:11px;height:22px;max-height:22px}
+.qh.qh-scenes .compact-market .market-card-energy{font-size:11px;line-height:15px}
+.qh.qh-scenes .compact-market .market-badges{height:11px;min-height:11px;overflow:hidden}
+.qh.qh-scenes .compact-market .fg-inline-controls{margin-top:3px;padding-top:3px}
+.qh.qh-scenes .compact-market .fg-inline-controls button{height:22px;min-height:22px;min-width:22px;font-size:13px}
+.qh.qh-scenes .compact-market .fg-inline-controls .fg-adjust{font-size:9px}
+.qh.qh-scenes .market-browser>.market-pagination{grid-column:1/-1;grid-row:2;display:flex!important;flex-direction:row!important;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;width:100%;height:auto;min-height:38px;max-height:none;padding:10px 4px 2px;position:static;overflow:visible;border:0;background:none;box-shadow:none;font-size:11px;color:#84694c}
+.qh.qh-scenes .market-pagination button{min-width:60px;padding:6px 10px;border:1px solid #c9b28d;border-radius:12px;background:#fff9e9;color:#715538;cursor:pointer;min-height:30px}
+.qh.qh-scenes .market-pagination button:disabled{opacity:.4;cursor:default}.qh.qh-scenes .market-pagination small{font-size:10px}
+.market-local-query{width:170px;max-width:45vw;padding:7px 10px;border:1px solid #d4c0a0;border-radius:12px;background:#fffdf5;color:#694d34;font:inherit;font-size:11px}
+.qh.qh-scenes .market-search{display:flex;align-items:center;gap:6px}
+@media(max-width:700px){.qh.qh-scenes .cream-studio .market-browser{grid-template-columns:76px minmax(0,1fr);padding:7px;gap:6px}.qh.qh-scenes .cream-kitchen .compact-market .market-shelf>.fg-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:178px;gap:5px}.qh.qh-scenes .market-shelf>header>span{display:none}.qh.qh-scenes .compact-market .market-shelf>header{padding:6px;min-height:25px}.qh.qh-scenes .compact-market .market-shelf>header h4{font-size:12px}.qh.qh-scenes .market-pagination{gap:5px;font-size:10px}.qh.qh-scenes .market-pagination>span{flex-basis:100%;text-align:center}.market-local-query{width:120px}}
+/* Confirming a searched food is a deliberate step, separate from recording a meal. */
+.food-shelf-search .food-shelf-confirm {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:18px;margin-top:16px;border:1px solid #d8c39f;border-radius:18px;background:#fffaf0;color:#654e38}
+.food-shelf-search .food-shelf-confirm h3,.food-shelf-search .food-shelf-confirm p,.food-shelf-search .food-shelf-confirm>button {grid-column:1/-1;margin:0}
+.food-shelf-search .food-shelf-confirm label {display:flex;flex-direction:column;gap:6px;min-width:0;font-size:15px}
+.food-shelf-search .food-shelf-confirm input,.food-shelf-search .food-shelf-confirm select {width:100%;min-width:0;box-sizing:border-box;border:1px solid #d8c39f;border-radius:10px;padding:10px;background:#fffdf8;color:#654e38;font:inherit}
+.food-shelf-search .food-shelf-confirm>button {padding:12px;border-radius:12px;cursor:pointer}
+.food-shelf-search .food-shelf-confirm>button:disabled {opacity:.5;cursor:default}
+@media(max-width:640px){.food-shelf-search .food-shelf-confirm{grid-template-columns:1fr 1fr;padding:12px}.food-shelf-search .food-shelf-confirm label:first-of-type{grid-column:1/-1}}
+.food-shelf-search .qh-label-import:not(.food-shelf-confirm){display:grid;gap:12px;padding:16px;border:1px solid #d8c39f;border-radius:16px;background:#f8f7eb}
+.food-shelf-search .qh-label-import label{display:flex;flex-direction:column;gap:6px;min-width:0}
+.food-shelf-search .qh-label-import input,.food-shelf-search .qh-label-import select,.food-shelf-search .qh-label-import textarea{box-sizing:border-box;max-width:100%;min-width:0;border:1px solid #d8c39f;border-radius:10px;padding:10px;background:#fffdf8;font:inherit}

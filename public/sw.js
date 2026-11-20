@@ -1,5 +1,5 @@
-const CACHE_NAME = "expense-tracker-v2";
-const PUBLIC_ASSETS = ["/icon.png", "/manifest.webmanifest"];
+const CACHE_NAME = "avobloom-assets-v10";
+const PUBLIC_ASSETS = ["/brand/avobloom-icon-v2.png", "/fonts/lxgw-wenkai/LXGWWenKai-Regular.woff2"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PUBLIC_ASSETS)));

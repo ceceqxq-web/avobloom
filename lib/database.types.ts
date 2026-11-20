@@ -9,6 +9,12 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      wellgrove_health: {
+        Row: {user_id:string;revision:number;payload:Json;updated_at:string};
+        Insert: {user_id:string;revision?:number;payload:Json;updated_at?:string};
+        Update: {revision?:number;payload?:Json;updated_at?:string};
+        Relationships: [];
+      };
       expenses: {
         Row: {
           id: string;

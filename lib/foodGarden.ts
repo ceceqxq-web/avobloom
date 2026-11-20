@@ -1,0 +1,25 @@
+import {kitchenMeats} from './kitchenMeats.ts';
+import {plannerFoods} from './mealPlanner.ts';
+import {foodCalories,type HealthEntry} from './foodRecord.ts';
+import type {FoodNutrition} from './foodNutrition';
+export type GardenFood={id:string;name:string;icon:string;label:FoodNutrition;amount:number;caption:string;template?:HealthEntry;frequency:number};
+export function foodPicture(name:string){return (/鸡蛋|egg/i.test(name)?'🥚':/牛肉|beef/i.test(name)?'🥩':/鸡|chicken/i.test(name)?'🍗':/豆腐|tofu/i.test(name)?'🧊':/饼干|cracker|cookie/i.test(name)?'🍪':/米|rice|藜麦/i.test(name)?'🍚':/奶|milk|酸奶|yogurt/i.test(name)?'🥛':/杏仁|坚果|花生|nuts|almond/i.test(name)?'🥜':/鱼|fish|salmon|鳕/i.test(name)?'🐟':/梨|pear/i.test(name)?'🍐':/橙|orange/i.test(name)?'🍊':/香蕉|banana/i.test(name)?'🍌':/莓|berries/i.test(name)?'🫐':/胡萝卜|carrot/i.test(name)?'🥕':/番茄|西红柿|tomato/i.test(name)?'🍅':/菜|菠菜|broccoli|西兰花/i.test(name)?'🥦':/面包|bread/i.test(name)?'🍞':/燕麦|oat/i.test(name)?'🥣':'🍽️')}
+const starter:[string,number,string][]=[['egg',50,'1个 · 去壳熟重'],['tofu',120,'1小份 · 沥水重'],['rice',150,'约1小碗 · 熟重'],['chicken',100,'1份 · 熟重'],['salmon',100,'1份 · 熟重'],['broccoli',150,'1份 · 熟重'],['tomato',150,'约1个 · 可食重'],['oats',40,'1份 · 干重'],['milk',250,'1杯 · 250mL'],['yogurt',150,'1小碗'],['pear',180,'约1个 · 可食重'],['crackers',20,'1份 · 20g'],['bread',30,'约1片'],['beef',100,'1掌心份量 · 熟重'],['cod',100,'1掌心份量 · 熟重'],['shrimp',100,'1小份 · 去壳熟重'],['spinach',150,'1小盘 · 熟重'],['carrot',80,'约1根 · 熟重'],['apple',150,'约1个 · 可食部分'],['banana',100,'约1根 · 可食部分'],['orange',130,'约1个 · 可食部分'],['blueberry',80,'1小把'],['almond',12,'约10颗'],['oil',5,'约1小勺']];
+export function gardenFoods(entries:HealthEntry[],catalog:FoodNutrition[]):GardenFood[]{
+ const groups=new Map<string,{entry:HealthEntry;count:number}>();
+ for(const entry of [...entries].filter(e=>e.type==='food').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))){const id=entry.foodLabel?.id||entry.name.toLowerCase().trim(),old=groups.get(id);groups.set(id,{entry,count:(old?.count||0)+1})}
+ const known=[...groups].filter(([id])=>!id.startsWith("garden-")).map(([id,{entry:e,count}]):GardenFood=>{
+  const label=catalog.find(f=>f.id===id)||e.foodLabel||{id,name:e.name,unit:e.amountUnit||'g',energyKcal:!e.weightUnknown&&e.amount>0?(foodCalories(e)||0)*100/e.amount:0,protein:!e.weightUnknown&&e.amount>0?(e.protein||0)*100/e.amount:0,carbs:!e.weightUnknown&&e.amount>0?(e.carbs||0)*100/e.amount:0,fat:!e.weightUnknown&&e.amount>0?(e.fat||0)*100/e.amount:0,source:'通用估算',importedAt:''};
+  return {id,name:e.name,icon:foodPicture(e.name),label,amount:e.amount,caption:(e.quantityText&&!/份/.test(e.quantityText)?e.quantityText:null)||`${e.weightUnknown?'份量待补全':e.amount+' '+(e.amountUnit||'g')}`,template:e,frequency:count};
+ }).sort((a,b)=>b.frequency-a.frequency);
+ for(const label of catalog)if(!label.id.startsWith("garden-")&&!known.some(f=>f.id===label.id)){const amount=(label.unit==='mL'?label.serving?.millilitres:label.serving?.grams)||100;known.push({id:label.id,name:label.name,icon:foodPicture(label.name),label,amount,caption:label.serving?.description||`${amount} ${label.unit}`,frequency:0})}
+ for(const [id,amount,caption] of starter){const f=plannerFoods[id],key='garden-'+id;if(known.some(v=>v.id===key))continue;const saved=catalog.find(v=>v.id===key)||groups.get(key)?.entry.foodLabel;known.push({id:key,name:f.name,icon:foodPicture(f.name),label:saved||{id:key,name:f.name,unit:f.unit,energyKcal:f.n.calories,protein:f.n.protein,carbs:f.n.carbs,fat:f.n.fat,source:'通用估算',importedAt:'',labelEvidence:f.basis},amount,caption,frequency:groups.get(key)?.count||0})}
+ for(const f of kitchenMeats()){if(known.some(v=>v.id===f.id))continue;const saved=catalog.find(v=>v.id===f.id);known.push({...f,label:saved||f.label,frequency:groups.get(f.id)?.count||0})}
+ return known.sort((a,b)=>b.frequency-a.frequency);
+}
+export function gardenRecord(food:GardenFood,ratio:number,date:string,meal:string):HealthEntry{
+ if(!Number.isFinite(ratio)||ratio<=0||ratio>50)throw new Error('分量无效');
+ const e=food.template,scale=(n:number|null|undefined)=>n==null?null:Math.round(n*ratio*100)/100,amount=Math.round(food.amount*ratio*100)/100;
+ const totals=e?{energyKcal:scale(foodCalories(e)),protein:scale(e.protein),carbs:scale(e.carbs),fat:scale(e.fat)}:{energyKcal:scale(food.label.energyKcal*food.amount/100),protein:scale(food.label.protein*food.amount/100),carbs:scale(food.label.carbs*food.amount/100),fat:scale(food.label.fat*food.amount/100)};
+ return {...(e||{}),id:crypto.randomUUID(),date,meal,time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false}),type:'food',name:food.name,amount,amountUnit:e?.amountUnit||food.label.unit,...totals,foodLabel:e?(e.foodLabel?food.label:undefined):food.label,quantityText:`${Number(ratio.toFixed(2))}份`,foodInput:undefined,portionBasis:undefined,portionMode:'servings',portionSpec:{amount:e?.weightUnknown?null:food.amount,quantity:1,quantityUnit:'份'},servings:ratio,planImportKey:undefined,planId:undefined,recordNote:`图片餐盘记录，每份 ${food.caption}；${food.template?'沿用最近一次记录的份量和营养依据':`${food.label.source}；${food.label.labelEvidence||food.caption}`}。可在编辑中校正。`};
+}

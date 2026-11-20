@@ -24,6 +24,7 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const protectedPath =
     request.nextUrl.pathname === "/" ||
+    request.nextUrl.pathname === "/meal-planner" ||
     request.nextUrl.pathname.startsWith("/expenses") ||
     request.nextUrl.pathname.startsWith("/reports");
 

@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {gardenNutrition} from '../lib/gardenNutrition.ts';
+test('macro percentages use energy rather than gram ratios',()=>{const n=gardenNutrition([{protein:10,carbs:10,fat:10}]);assert.equal(n.totals.fat,10);assert.ok(Math.abs(n.shares.fat-90/170*100)<1e-8);assert.ok(Math.abs(Object.values(n.shares).reduce((a,b)=>a+b)-100)<1e-8)});
+test('missing macros suppress percentages and empty plate has no fabricated ratio',()=>{assert.equal(gardenNutrition([{protein:null,carbs:10,fat:5}]).shares.carbs,null);assert.equal(gardenNutrition([]).shares.protein,null)});

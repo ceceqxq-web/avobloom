@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Avobloom
 
-## Getting Started
+A cozy nutrition and health tracker built with Next.js, React and Supabase.
 
-First, run the development server:
+Live app: https://avobloom-health.vercel.app/
 
-```bash
+## Run locally
+
+Requires Node.js 22.13 or newer.
+
+```sh
+npm ci
+cp .env.local.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Set the Supabase project URL and publishable/anon key in `.env.local`. Use `WELLGROVE_STORAGE=supabase` to share the same authenticated account data across local, desktop web and mobile. Configure exact OAuth callback URLs for each app origin in Supabase. Optional AI features require a server-side OpenAI API key.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Vercel automatically uses the authenticated Supabase store. Apply `supabase/migrations/202611050001_wellgrove_health.sql` to provision its account-isolated table and policies. Never expose a service-role key in browser configuration.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+For an explicitly separate offline local store, set `WELLGROVE_STORAGE=sqlite`. SQLite files stay under `.health-data/` and do not sync in this mode. `WELLGROVE_MERGE_LOCAL=1` enables a one-time merge of legacy local records into the signed-in cloud account, preserving existing cloud records and settings. Enable it only on the machine/account whose records should be merged.
 
-## Learn More
+## Validation
 
-To learn more about Next.js, take a look at the following resources:
+```sh
+npx tsc --noEmit
+node --experimental-strip-types --test tests/*.test.mjs
+npm run build -- --webpack
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Food illustrations are visual references, not a source for nutritional values. Product labels remain user-reviewable before saving; missing fields are not silently treated as zero.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Private data
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The repository excludes environment secrets, local databases, health exports, screenshots, build output and temporary files. Production secrets are configured in Vercel; user records are stored in Supabase with account-level row security.

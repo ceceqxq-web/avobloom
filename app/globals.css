@@ -39,3 +39,15 @@ button { cursor:pointer; }
 .suggestions article { min-height:64px;border-bottom:1px solid var(--line);gap:12px; }.suggestions article>span { display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#e4e8e1;color:#607266;font:12px Georgia; }.suggestions article button { margin-left:auto;border:0;background:transparent;color:#66736b;font-size:20px; }
 @media(max-width:520px){.health-page{padding:0}.phone-app{min-height:100vh;border-radius:0;box-shadow:none}.hero-copy{margin-top:42px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+@font-face{
+ font-family:'LXGW WenKai';
+ src:url('/fonts/lxgw-wenkai/LXGWWenKai-Regular.woff2') format('woff2');
+ font-weight:400;
+ font-style:normal;
+ font-display:swap;
+}
+/* One typeface throughout the app, including locally styled cards and forms. */
+body.wellgrove-wenkai,body.wellgrove-wenkai *{
+ font-family:'LXGW WenKai','Kaiti SC','STKaiti',serif!important;
+}

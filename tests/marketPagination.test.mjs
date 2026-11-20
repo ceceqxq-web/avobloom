@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {marketPage,marketDepartmentPage} from '../lib/marketPagination.ts';
+import {authCallbackRedirect} from '../lib/health/authRedirect.ts';
+test('60 item pages retain every food and department boundary',()=>{const groups=[{name:'蛋奶',foods:Array.from({length:5},(_,i)=>`egg${i}`)},{name:'肉类',foods:Array.from({length:80},(_,i)=>`meat${i}`)},{name:'水果',foods:['apple']}];const first=marketPage(groups,0),second=marketPage(groups,1);assert.equal(first.count,60);assert.equal(second.count,26);assert.deepEqual([...first.groups,...second.groups].flatMap(g=>g.foods),groups.flatMap(g=>g.foods));assert.equal(marketDepartmentPage(groups,'水果'),1);assert.equal(marketPage(groups,99).page,1)});
+test('empty filters and category start at a page boundary',()=>{assert.equal(marketPage([],0).pages,1);assert.equal(marketPage([],0).count,0);assert.equal(marketDepartmentPage([{name:'a',foods:Array(60).fill('x')},{name:'b',foods:['y']}],'b'),1)});
+test('OAuth root callback goes to the session exchange and drops unsafe next URLs',()=>{const result=authCallbackRedirect(new URL('https://example.com/?code=demo&next=//evil.test&token=unused'));assert.equal(result.pathname,'/auth/callback');assert.equal(result.searchParams.get('code'),'demo');assert.equal(result.searchParams.has('next'),false);assert.equal(result.searchParams.has('token'),false);assert.equal(authCallbackRedirect(new URL('https://example.com/')),null) });

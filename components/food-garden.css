@@ -1,0 +1,164 @@
+/* Wellgrove · cozy island style for the food garden, weigh-in and the welcome scene.
+   Warm cream paper, leaf green, sky blue, sand and wood; brown ink instead of black;
+   rounded type, stitched edges, soft "toy" shadows. */
+.food-garden,.fg-weight,.fg-scene,.qh-modal.fg-modal,.qh-modal:has(.fg-weight){
+  --fg-ink:#6e5440; --fg-soft:#9c826b; --fg-paper:#fffdf5; --fg-cream:#fff6dc; --fg-sand:#f3e2b6;
+  --fg-line:#eadbb8; --fg-leaf:#62b86f; --fg-leaf-d:#3f9157; --fg-grass:#a6dc8c; --fg-sky:#bfe7f6;
+  --fg-wood:#d9a96f; --fg-wood-d:#a8753f; --fg-peach:#ffb3a0; --fg-pink:#ff8fa3; --fg-sun:#ffd76a;
+  --fg-round:"Yuanti SC","Hiragino Maru Gothic ProN","Arial Rounded MT Bold","PingFang SC","Microsoft YaHei",sans-serif;
+  --fg-num:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold","PingFang SC",sans-serif;
+  color:var(--fg-ink); font-family:var(--fg-round);
+}
+
+/* modal frames */
+.qh-modal.fg-modal,.qh-modal:has(.fg-weight){background:var(--fg-paper);border:3px solid var(--fg-line);border-radius:30px;box-shadow:0 10px 0 var(--fg-sand),0 30px 70px #5b432c33;outline:2px dashed var(--fg-line);outline-offset:-12px}
+.qh-modal.fg-modal{width:min(880px,calc(100vw - 32px));max-width:880px;max-height:calc(100vh - 40px);overflow:auto}
+.qh-modal.fg-modal .qh-card-title h2,.qh-modal:has(.fg-weight) .qh-card-title h2{font-family:var(--fg-round);font-size:20px;color:var(--fg-ink)}
+.qh-modal.fg-modal>p,.qh-modal:has(.fg-weight)>p{color:var(--fg-soft)}
+.qh-modal.fg-modal label,.qh-modal:has(.fg-weight) label{color:var(--fg-soft)}
+.qh-modal.fg-modal select,.qh-modal:has(.fg-weight) input[type=date]{border:2px solid var(--fg-line);border-radius:14px;background:var(--fg-cream);color:var(--fg-ink)}
+
+/* banner: sky, clouds and a grassy hill */
+.fg-banner{position:relative;overflow:hidden;margin:12px 0 18px;padding:24px 26px 46px;border-radius:26px;background:linear-gradient(180deg,var(--fg-sky) 0%,#e3f5fb 70%);border:3px solid #fff}
+.fg-banner::after{content:"";position:absolute;left:-10px;right:-10px;bottom:-18px;height:52px;background:radial-gradient(40px 26px at 40px 26px,var(--fg-grass) 98%,transparent) 0 0/80px 52px repeat-x,linear-gradient(var(--fg-grass),var(--fg-grass)) 0 26px/100% 30px no-repeat}
+.fg-banner h3{font-size:24px;margin:10px 0 6px;color:#4f6b52;position:relative;z-index:1}
+.fg-banner p{font-size:13px;margin:0;color:#5f8a76;position:relative;z-index:1}
+.fg-cloud{position:absolute;width:90px;height:30px;border-radius:30px;background:#fff;opacity:.9}
+.fg-cloud::before,.fg-cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.fg-cloud::before{width:38px;height:38px;left:14px;top:-18px}.fg-cloud::after{width:28px;height:28px;left:46px;top:-12px}
+.fg-cloud-a{right:150px;top:22px;animation:fg-drift 18s ease-in-out infinite alternate}
+.fg-cloud-b{right:40px;top:56px;transform:scale(.7);animation:fg-drift 24s ease-in-out infinite alternate-reverse}
+@keyframes fg-drift{from{translate:-30px 0}to{translate:30px 0}}
+.fg-decor{position:absolute;right:22px;bottom:6px;font-size:64px;line-height:1;z-index:1;filter:drop-shadow(0 4px 0 #0000000f)}
+.fg-decor small{font-size:24px;margin-left:-6px}
+
+/* wooden sign tag */
+.fg-kicker{display:inline-block;position:relative;z-index:1;font-size:12px;font-weight:700;letter-spacing:.06em;color:#fff8ea;background:var(--fg-wood);padding:4px 12px;border-radius:10px;box-shadow:0 3px 0 var(--fg-wood-d);background-image:repeating-linear-gradient(0deg,transparent 0 6px,#ffffff14 6px 7px)}
+
+/* tabs: leaf pills */
+.fg-tabs{display:flex;gap:8px;overflow:auto;padding:4px 2px 14px}
+.fg-tabs button{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--fg-line);background:var(--fg-cream);color:var(--fg-ink);border-radius:999px;padding:8px 15px;font-size:13px;font-family:var(--fg-round);white-space:nowrap;cursor:pointer;box-shadow:0 3px 0 var(--fg-line);transition:transform .15s}
+.fg-tabs button:hover{transform:translateY(-2px)}
+.fg-tabs .active{background:var(--fg-leaf);border-color:var(--fg-leaf-d);color:#fff;box-shadow:0 3px 0 var(--fg-leaf-d)}
+.fg-hint{font-size:12px!important;color:var(--fg-soft);margin:-4px 0 10px}
+
+/* food tiles: stitched paper cards on a little island */
+.fg-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;max-height:420px;overflow:auto;padding:10px 6px 16px}
+.fg-tile{position:relative;text-align:center;border:2px solid var(--fg-line);border-radius:24px;background:var(--fg-paper);padding:10px 10px 9px;cursor:pointer;min-width:0;color:var(--fg-ink);font-family:var(--fg-round);box-shadow:0 5px 0 var(--fg-sand);outline:2px dashed #f0e4c6;outline-offset:-7px;transition:transform .18s cubic-bezier(.3,1.6,.5,1),box-shadow .15s}
+.fg-tile:hover{transform:translateY(-4px) rotate(-1.5deg);box-shadow:0 9px 0 var(--fg-sand)}
+.fg-tile:active{transform:translateY(3px) scale(.96);box-shadow:0 2px 0 var(--fg-sand)}
+.fg-tile.picked{background:#f3fbe9;border-color:#bfe2a9;outline-color:#d3edc1;box-shadow:0 5px 0 #cfe8bc}
+.fg-art{position:relative;height:80px;display:flex;align-items:center;justify-content:center;font-size:46px;margin-bottom:8px;border-radius:50% 50% 22px 22px/60% 60% 22px 22px;background:radial-gradient(ellipse 48% 18% at 50% 86%,#8fcf78 0 96%,transparent) ,linear-gradient(180deg,#e8f7fc 0%,#f6fbef 100%)}
+.fg-art>*{position:relative;top:-4px;filter:drop-shadow(0 3px 0 #00000012)}
+.fg-tile:hover .fg-art>*{animation:fg-wiggle .5s ease-in-out}
+@keyframes fg-wiggle{25%{transform:rotate(-8deg)}60%{transform:rotate(6deg)}100%{transform:rotate(0)}}
+.fg-product{width:84%;height:88%;background-size:contain;background-position:center;background-repeat:no-repeat}
+.fg-tile b{font-size:13px;display:block;line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fg-tile>small{display:block;font-size:10px;color:var(--fg-soft);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fg-tile-foot{display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:10px;color:var(--fg-soft);margin-top:8px;text-align:left}
+.fg-tile-foot i{font-style:normal;flex:none;background:var(--fg-sun);color:#7a5a1e;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:700;box-shadow:0 2px 0 #e3b84a}
+.fg-count{position:absolute;top:-8px;right:-6px;z-index:2;min-width:34px;padding:4px 9px;border-radius:16px 4px 16px 4px;background:var(--fg-leaf);color:#fff;font:700 12px var(--fg-num);box-shadow:0 3px 0 var(--fg-leaf-d);transform:rotate(6deg)}
+.fg-pop{position:absolute;left:50%;top:10px;z-index:3;pointer-events:none;white-space:nowrap;font:800 16px var(--fg-num);color:#e9677c;text-shadow:0 2px 0 #fff,0 -1px 0 #fff,2px 0 0 #fff,-2px 0 0 #fff}
+.fg-flyer,.fg-confetti{position:fixed;z-index:60;pointer-events:none;line-height:1}
+.fg-flyer{font-size:44px;filter:drop-shadow(0 4px 2px #5b432c33)}
+.fg-confetti{font-size:22px}
+
+/* portion card */
+.fg-portion{margin-top:16px;border:2px solid var(--fg-line);padding:18px;border-radius:24px;background:var(--fg-cream);outline:2px dashed #f2e6c8;outline-offset:-8px}
+.fg-portion>div:first-child{display:flex;align-items:center;gap:10px}
+.fg-portion>div:first-child>span{font-size:28px}
+.fg-portion>div:first-child>b{font-size:16px}
+.fg-portion>div:first-child>button{margin-left:auto;background:#fff;border:2px solid var(--fg-line);width:34px;height:34px;border-radius:50%;font-size:20px;color:var(--fg-soft);cursor:pointer;line-height:1}
+.fg-portion>small{font-size:11px;color:var(--fg-soft);display:block;margin:6px 0}
+.fg-stepper{display:flex;align-items:center;justify-content:center;gap:24px;margin:16px 0}
+.fg-stepper button{border:2px solid var(--fg-line);border-radius:50%;background:#fff;box-shadow:0 4px 0 var(--fg-sand);color:var(--fg-leaf-d);width:46px;height:46px;font-size:24px;font-weight:700;cursor:pointer}
+.fg-stepper button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--fg-sand)}
+.fg-stepper button:disabled{opacity:.4;cursor:default}
+.fg-stepper output{font:700 32px var(--fg-num);min-width:96px;text-align:center}
+.fg-stepper output small{font-size:14px;font-family:var(--fg-round)}
+.fg-presets,.fg-marks{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.fg-marks{margin-top:14px}
+.fg-presets button,.fg-marks button{border:2px solid var(--fg-line);background:#fff;color:var(--fg-ink);border-radius:999px;padding:8px 14px;font-size:12px;font-family:var(--fg-round);cursor:pointer;box-shadow:0 3px 0 var(--fg-line)}
+.fg-presets button[aria-pressed=true]{background:var(--fg-sun);border-color:#e3b84a;box-shadow:0 3px 0 #e3b84a}
+.fg-marks button[aria-pressed=true]{background:#ffe3e8;border-color:var(--fg-pink);box-shadow:0 3px 0 #f7b9c4}
+.fg-marks button:disabled{opacity:.45;cursor:not-allowed}
+.fg-grams{font-size:12px!important;margin-top:18px!important;color:var(--fg-soft)!important}
+.fg-grams input[type=range]{padding:0!important;margin:12px 0!important;accent-color:var(--fg-leaf);min-height:24px;box-shadow:none!important;border:0!important;background:transparent!important}
+
+/* basket: a plate on a gingham picnic cloth */
+.fg-basket{margin-top:20px;padding:20px;border-radius:28px;border:3px solid #fff;background-color:#fff4f1;background-image:repeating-linear-gradient(0deg,#ffc9bd66 0 16px,transparent 16px 32px),repeating-linear-gradient(90deg,#ffc9bd66 0 16px,transparent 16px 32px);box-shadow:0 6px 0 #f1d6cd}
+.fg-plate{min-height:112px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;padding:18px;border-radius:999px;background:radial-gradient(circle at 50% 50%,#fff 0 58%,#f6f1e4 59% 62%,#fff 63%);border:3px solid #fff;box-shadow:0 0 0 3px #efe5cf,0 8px 0 #e7d7c9}
+.fg-plate>button{border:0;background:transparent;cursor:pointer;padding:2px 4px;font-family:var(--fg-round)}
+.fg-plate>button>span{font-size:36px;display:block;line-height:1.1}
+.fg-plate>button>small{font-size:10px;color:var(--fg-soft)}
+.fg-plate-empty{text-align:center;opacity:.75}
+.fg-plate-empty>span{font-size:34px;display:block}
+.fg-plate-empty small{display:block;font-size:12px;color:var(--fg-soft)}
+.fg-summary{text-align:center;margin:18px 0 14px}
+.fg-summary b{font-size:15px}
+.fg-kcal{font:800 22px var(--fg-num);color:#e9677c}
+.fg-summary small{display:block;font-size:10px;color:var(--fg-soft);margin-top:6px}
+.fg-save{display:block;width:100%;border:0;border-radius:999px;padding:15px;background:var(--fg-leaf);color:#fff;font:700 17px var(--fg-round);letter-spacing:.04em;box-shadow:0 6px 0 var(--fg-leaf-d);cursor:pointer;transition:transform .1s,box-shadow .1s}
+.fg-save:hover:not(:disabled){filter:brightness(1.04)}
+.fg-save:active:not(:disabled){transform:translateY(5px);box-shadow:0 1px 0 var(--fg-leaf-d)}
+.fg-save:disabled{opacity:.5;cursor:default;box-shadow:0 6px 0 #c9dcc7;background:#a9cfae}
+.fg-basket p[role=alert]{color:#d0485f;text-align:center;font-size:13px}
+.fg-text{display:block;background:none;border:0;color:var(--fg-soft);font-size:12px;font-family:var(--fg-round);margin:20px auto 4px;cursor:pointer;text-decoration:underline dotted;text-underline-offset:4px}
+.fg-empty{padding:28px;text-align:center}
+.fg-empty>span{font-size:40px}
+.fg-empty p{font-size:13px;color:var(--fg-soft)}
+.fg-empty button{border:2px solid var(--fg-line);background:var(--fg-cream);padding:9px 18px;color:var(--fg-ink);border-radius:999px;cursor:pointer;font-family:var(--fg-round);box-shadow:0 3px 0 var(--fg-line)}
+
+/* weigh-in */
+.fg-weight{text-align:center;padding:12px 4px 18px}
+.fg-weight h3{font-size:22px;margin:12px 0 6px}
+.fg-weight>p{font-size:12px!important;color:var(--fg-soft)!important;margin:0}
+.fg-scale{position:relative;margin:22px auto 12px;max-width:380px;padding:30px 18px 18px;border-radius:40px 40px 30px 30px;background:linear-gradient(180deg,#e9f7fc 0%,#f4fbe9 60%,#d8f0c4 100%);border:4px solid #fff;box-shadow:0 0 0 3px var(--fg-line),0 10px 0 var(--fg-sand)}
+.fg-sprout{position:absolute;left:50%;top:-26px;translate:-50% 0;font-size:40px;line-height:1;animation:fg-hop .45s cubic-bezier(.3,1.7,.5,1)}
+@keyframes fg-hop{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-10px) scale(1.12,.92)}100%{transform:translateY(0) scale(1)}}
+.qh-modal .fg-readout,.fg-readout{display:block;margin:0 0 14px!important;padding:10px 12px 8px;background:var(--fg-paper);border:3px solid var(--fg-line);border-radius:22px;font-size:11px!important;color:var(--fg-soft)!important;box-shadow:inset 0 -4px 0 #f6eedb}
+.fg-readout>span{display:flex;align-items:baseline;justify-content:center;gap:6px}
+.qh-modal .fg-readout input,.fg-readout input{display:inline-block!important;width:7ch!important;margin:2px 0 0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;text-align:center;font:800 46px/1.1 var(--fg-num)!important;color:var(--fg-ink)!important;-moz-appearance:textfield;appearance:textfield}
+.fg-readout input::-webkit-inner-spin-button,.fg-readout input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.fg-readout small{font:700 18px var(--fg-num);color:var(--fg-soft)}
+.fg-ruler{position:relative;height:72px;border-radius:18px;overflow:hidden;touch-action:none;cursor:grab;user-select:none;background:linear-gradient(180deg,#f7dcb0,#efcb93);border:3px solid var(--fg-wood-d);box-shadow:inset 0 3px 0 #ffffff66,0 4px 0 #8c5f30}
+.fg-ruler:active{cursor:grabbing}
+.fg-ruler canvas{display:block;width:100%;height:100%}
+.fg-needle{position:absolute;left:50%;top:0;bottom:0;width:4px;margin-left:-2px;background:#e9677c;border-radius:2px;pointer-events:none}
+.fg-needle::before{content:"";position:absolute;left:50%;top:-2px;width:16px;height:16px;translate:-50% 0;background:#e9677c;border-radius:0 50% 50% 50%;rotate:45deg}
+.fg-weight-steps{display:flex;gap:8px;justify-content:center;margin:18px 0 12px;flex-wrap:wrap}
+.fg-weight-steps button{border:2px solid var(--fg-line);border-radius:999px;padding:9px 14px;background:#fff;color:var(--fg-ink);font:700 14px var(--fg-num);cursor:pointer;box-shadow:0 3px 0 var(--fg-line)}
+.fg-weight-steps button:active{transform:translateY(3px);box-shadow:none}
+.fg-weight>small{color:var(--fg-soft);font-size:11px}
+
+/* welcome scene on the dashboard */
+.fg-scene{position:relative;overflow:hidden;margin:8px 0 25px;padding:28px 28px 40px;display:flex;align-items:center;gap:22px;border-radius:30px;border:3px solid #fff;background:linear-gradient(180deg,var(--fg-sky) 0%,#eaf7fb 75%);box-shadow:0 0 0 2px var(--fg-line),0 8px 0 var(--fg-sand)}
+.fg-scene::after{content:"";position:absolute;left:-10px;right:-10px;bottom:-22px;height:52px;background:radial-gradient(40px 26px at 40px 26px,var(--fg-grass) 98%,transparent) 0 0/80px 52px repeat-x,linear-gradient(var(--fg-grass),var(--fg-grass)) 0 26px/100% 30px no-repeat;pointer-events:none}
+.fg-scene>*{position:relative;z-index:1}
+.fg-scene-art{font-size:62px;line-height:1;filter:drop-shadow(0 4px 0 #0000000f)}
+.fg-scene h2{margin:8px 0 8px;font-size:24px;color:#4f6b52}
+.fg-scene p{color:#5f8a76;font-size:13px;margin:0}
+.fg-scene-actions{margin-left:auto;display:flex;gap:10px}
+.fg-scene-actions button{border:2px solid var(--fg-line);border-radius:999px;background:var(--fg-paper);padding:13px 20px;color:var(--fg-ink);font:600 14px var(--fg-round);cursor:pointer;box-shadow:0 4px 0 var(--fg-sand);transition:transform .12s}
+.fg-scene-actions button:hover{transform:translateY(-2px)}
+.fg-scene-actions button:first-child{background:var(--fg-leaf);border-color:var(--fg-leaf-d);color:#fff;box-shadow:0 4px 0 var(--fg-leaf-d)}
+
+.food-garden button:focus-visible,.fg-weight button:focus-visible,.fg-scene button:focus-visible,.fg-ruler:focus-visible,.fg-readout input:focus-visible{outline:3px solid #f0a64a;outline-offset:3px}
+
+.fg-tofu{width:62px;height:62px;display:inline-block;vertical-align:middle}
+.fg-plate .fg-tofu,.fg-portion .fg-tofu{width:40px;height:40px}
+
+@media(max-width:650px){
+  .fg-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-height:360px}
+  .fg-art{height:66px;font-size:38px}
+  .fg-banner{padding:20px 18px 44px}.fg-banner h3{font-size:20px}.fg-decor{font-size:46px}.fg-cloud-a{right:110px}
+  .fg-tile{padding:8px;border-radius:20px}
+  .fg-scene{padding:20px 18px 40px;flex-wrap:wrap;gap:12px}.fg-scene-art{font-size:42px}.fg-scene h2{font-size:20px}
+  .fg-scene-actions{margin:4px 0 0;width:100%}.fg-scene-actions button{flex:1;padding:12px}
+  .fg-portion{padding:14px}.qh-modal.fg-modal{padding:22px 16px}
+}
+@media(prefers-reduced-motion:reduce){
+  .fg-tile,.fg-tabs button,.fg-save,.fg-scene-actions button{transition:none}
+  .fg-tile:hover,.fg-tile:active,.fg-tabs button:hover{transform:none}
+  .fg-tile:hover .fg-art>*,.fg-sprout,.fg-cloud{animation:none}
+}

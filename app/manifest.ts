@@ -2,27 +2,21 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Expense Tracker AI",
-    short_name: "Expenses",
-    description: "Capture purchases and understand your spending with AI.",
+    name: "Avobloom — Daily Wellbeing",
+    short_name: "Avobloom",
+    description: "Grow healthier habits, one day at a time. Track nutrition, movement and wellbeing.",
     start_url: "/",
     display: "standalone",
-    background_color: "#f2f4ee",
-    theme_color: "#1f382b",
+    background_color: "#f7f0e2",
+    theme_color: "#927357",
     orientation: "portrait",
-    categories: ["finance", "productivity"],
+    categories: ["health", "lifestyle"],
     icons: [
       {
-        src: "/icon.png",
+        src: "/brand/avobloom-icon-v2.png",
         sizes: "1254x1254",
         type: "image/png",
         purpose: "any",
-      },
-      {
-        src: "/icon.png",
-        sizes: "1254x1254",
-        type: "image/png",
-        purpose: "maskable",
       },
     ],
   };
