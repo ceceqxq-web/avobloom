@@ -47,6 +47,8 @@ function LoginContent() {
           <span className="grid h-6 w-6 place-items-center rounded-full bg-white text-sm font-bold text-[#4285F4]">G</span>
           {isLoading ? "Signing in…" : "Sign in with Google"}
         </button>
+        <a href="/demo" className="mt-3 flex w-full items-center justify-center rounded-full border border-[#c9d4bc] bg-[#f4f5ea] px-5 py-3.5 text-sm font-semibold text-[#4d6642]">免登录查看 Demo</a>
+        <p className="mt-2 text-center text-xs leading-5 text-[#879188]">仅浏览示例界面，不读取或保存个人数据。</p>
         {(error || searchParams.get("error")) && (
           <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">
             {error || "Sign-in could not be completed. Please try again."}

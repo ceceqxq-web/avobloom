@@ -4,6 +4,8 @@ A cozy nutrition and health tracker built with Next.js, React and Supabase.
 
 Live app: https://avobloom-health.vercel.app/
 
+Public read-only demo: https://avobloom-health.vercel.app/demo . The demo uses fictional bundled examples, makes no health API requests, and provides no recording or saving controls. Personal account data remains behind authentication.
+
 ## Run locally
 
 Requires Node.js 22.13 or newer.
