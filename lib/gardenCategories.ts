@@ -2,7 +2,7 @@ export const gardenCategories=['肉蛋奶','蔬菜','水果','碳水','油脂'] 
 export type GardenCategory=typeof gardenCategories[number];
 export function gardenCategory(name:string):GardenCategory|null{
  if(/花生酱|坚果|杏仁|核桃|花生|奇亚|油|黄油|牛油果|nut|almond|peanut|chia|butter|avocado|oil/i.test(name))return '油脂';
- if(/蔬菜|西兰花|白菜|菠菜|木耳|胡萝卜|番茄|西红柿|茄子|黄瓜|蘑菇|菌|broccoli|spinach|carrot|tomato|vegetable|mushroom/i.test(name))return '蔬菜';
+ if(/蔬菜|生菜|西兰花|白菜|菠菜|木耳|胡萝卜|番茄|西红柿|茄子|黄瓜|蘑菇|菌|lettuce|broccoli|spinach|carrot|tomato|vegetable|mushroom/i.test(name))return '蔬菜';
  if(/芒果|梨|苹果|香蕉|橙|莓|葡萄|桃|西瓜|mango|pear|apple|banana|orange|berr|fruit|grape/i.test(name))return '水果';
  if(/鸡|蛋|牛肉|猪|排骨|五花|肉|鱼|虾|蚬|蛤|豆腐|奶|酸奶|豆|乳|egg|chicken|beef|meat|fish|salmon|cod|shrimp|tofu|milk|yogurt|skyr|bean/i.test(name))return '肉蛋奶';
  if(/米|饭|面|燕麦|藜麦|土豆|红薯|玉米|饼干|曲奇|年糕|rice|bread|oat|quinoa|potato|corn|cracker|cookie|pasta|cake/i.test(name))return '碳水';
