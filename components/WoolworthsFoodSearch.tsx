@@ -1,13 +1,13 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {rankedLibrary,libraryUsage,mergeLibraryFood} from "@/lib/foodLibrary";
 import type {HealthEntry} from "@/lib/foodRecord";
 import FoodIllustration from "./FoodIllustration";
 import PhotoNutritionCapture from "./PhotoNutritionCapture";
 import { parseNutritionLabel, servingFromLabel, woolworthsProductId, type FoodNutrition } from "@/lib/foodNutrition";
 type SearchProduct = { id: string; name: string; url: string; imageUrl?: string | null; nutrition?: FoodNutrition | null };
-type Props = { onFallback?:(query:string)=>void;entries?:HealthEntry[];onCache?:(food:FoodNutrition)=>void; staged?:boolean; saved: FoodNutrition[]; selected: FoodNutrition | null; onSelect: (food: FoodNutrition) => void; onImport: (food: FoodNutrition) => void };
-export default function WoolworthsFoodSearch({ saved, selected, onSelect, onImport, staged=false,entries=[],onCache,onFallback }: Props) {
+type Props = { compact?:boolean; onFallback?:(query:string)=>void;entries?:HealthEntry[];onCache?:(food:FoodNutrition)=>void; staged?:boolean; saved: FoodNutrition[]; selected: FoodNutrition | null; onSelect: (food: FoodNutrition) => void; onImport: (food: FoodNutrition) => void };
+export default function WoolworthsFoodSearch({ saved, selected, onSelect, onImport, staged=false,entries=[],onCache,onFallback,compact=false }: Props) {
   const [showPhoto,setShowPhoto]=useState(false);
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState<SearchProduct[]>([]);
@@ -20,7 +20,12 @@ export default function WoolworthsFoodSearch({ saved, selected, onSelect, onImpo
   const [editingCount,setEditingCount] = useState(false), [servingCount,setServingCount] = useState(""), [servingCountUnit,setServingCountUnit] = useState("crackers");
   const [countError,setCountError] = useState("");
   const [libraryNotice,setLibraryNotice]=useState("");
-  const localFoods=rankedLibrary(saved,entries,query),allFoods=rankedLibrary(saved,entries);
+  const localFoods=useMemo(()=>rankedLibrary(saved,entries,query),[saved,entries,query]),allFoods=useMemo(()=>rankedLibrary(saved,entries),[saved,entries]);
+  const controller=useRef<AbortController|null>(null);
+  useEffect(()=>()=>{controller.current?.abort()},[]);
+  function cancelSearch(){requestId.current++;controller.current?.abort();setBusy(false)}
+  function method(next:'search'|'paste'|'manual'|'photo'){cancelSearch();setError('');setShowLabel(next==='paste'||next==='manual');setManual(next==='manual');setShowPhoto(next==='photo')}
+  const activeMethod=showPhoto?'photo':showLabel?(manual?'manual':'paste'):'search';
   function cacheFood(food:FoodNutrition){if(!onCache)return;onCache(mergeLibraryFood(saved.find(p=>p.id===food.id),food));setLibraryNotice("已提交到本地商品库，保存状态见页面顶部；无需保存饮食记录，下次可直接选择。")}
   function saveServingCount() {
     if (!selected) return;
@@ -33,10 +38,11 @@ export default function WoolworthsFoodSearch({ saved, selected, onSelect, onImpo
   async function search(value = query,forceOnline=false) {
     if (!value.trim() || busy) return;
     if(!forceOnline&&rankedLibrary(saved,entries,value).length){setLibraryNotice("已找到本地商品，无需联网。若需要更多结果，请点击「联网搜索 / 更新标签」。");setProducts([]);setSearched(false);return}
+    controller.current?.abort();const requestController=new AbortController();controller.current=requestController;
     const id = ++requestId.current;
     setBusy(true); setError(""); setProducts([]); setSearched(false);
     try {
-      const response = await fetch(`/api/foods/woolworths?q=${encodeURIComponent(value.trim())}${forceOnline?"&refresh=1":""}`, { signal: AbortSignal.timeout(20000) });
+      const response = await fetch(`/api/foods/woolworths?q=${encodeURIComponent(value.trim())}${forceOnline?"&refresh=1":""}`, { signal: AbortSignal.any([requestController.signal,AbortSignal.timeout(20000)]) });
       const data = await response.json();
       if (id !== requestId.current) return;
       if (!response.ok) throw new Error(data.error || "查询失败，请稍后重试。");
@@ -45,7 +51,7 @@ export default function WoolworthsFoodSearch({ saved, selected, onSelect, onImpo
     } catch (e) {
       if (id !== requestId.current) return;
       setError(e instanceof Error && e.name !== "TimeoutError" ? e.message : "查询超时。可打开官网复制营养表导入。");
-      setShowLabel(true);
+      if(!compact)setShowLabel(true);
     } finally { if (id === requestId.current) setBusy(false); }
   }
   function importLabel() {
@@ -61,33 +67,34 @@ export default function WoolworthsFoodSearch({ saved, selected, onSelect, onImpo
         if (nutrition.energyKcal > 1000 || [nutrition.protein,nutrition.carbs,nutrition.fat].some(v=>v>100)) throw new Error("数值超出每 100 g / mL 范围，请核对标签。");
       } else nutrition = parseNutritionLabel(label, column, true);
       const food: FoodNutrition = { ...nutrition, labelEvidence:nutrition.lessThan?"标签含小于值，保留 < 标记；营养统计按上限估计，并非精确含量。":undefined, serving: manual ? undefined : servingFromLabel(label, column), id: productId ? `woolworths-${productId}` : crypto.randomUUID(), name: name.trim(), unit, source: "标签导入", sourceUrl: productId ? `https://www.woolworths.com.au/shop/productdetails/${productId}` : undefined, importedAt: new Date().toISOString() };
-      onImport(food); setShowLabel(false);
+      onImport(food); if(!compact)setShowLabel(false);
     } catch (e) { setError(e instanceof Error ? e.message : "标签识别失败，请检查格式。"); }
   }
-  return <section className="qh-woolworths" aria-label="Woolworths 商品搜索与导入">
-    <div className="qh-wool-title"><span className="qh-wool-logo">W</span><div><b>Woolworths 商品</b><small>搜索商品 · 导入包装营养标签</small></div></div>
-    <div className="qh-search-field"><input aria-label="Woolworths 商品关键词或链接" placeholder="商品英文名、编号或商品链接" value={query} maxLength={300} onChange={e=>{requestId.current++;setBusy(false);setQuery(e.target.value);setProducts([]);setSearched(false);setLibraryNotice("")}} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void search()}}}/><button type="button" disabled={busy||!query.trim()} onClick={()=>void search()}>{busy?"查询中…":"查询"}</button></div>
-    <div className="qh-search-links"><a href={searchUrl} target="_blank" rel="noreferrer">在 Woolworths 官网搜索 ↗</a><button type="button" onClick={()=>{setShowLabel(!showLabel);setError("")}}>粘贴 / 手填营养标签</button></div>
-    <button className="qh-photo-entry" type="button" onClick={()=>setShowPhoto(!showPhoto)}>◎ 拍照 / 上传营养标签识别</button>
+  return <section className={`qh-woolworths ${compact?"food-add-compact":""}`} aria-label="Woolworths 商品搜索与导入">
+    {compact&&<div className="food-add-methods" role="tablist" aria-label="添加食品方式">{([['search','搜索商品'],['paste','粘贴标签'],['manual','手动填写'],['photo','拍照识别']] as const).map(([key,title])=><button key={key} type="button" role="tab" aria-selected={activeMethod===key} onClick={()=>method(key)}>{title}</button>)}</div>}
+    {!compact&&<div className="qh-wool-title"><span className="qh-wool-logo">W</span><div><b>Woolworths 商品</b><small>搜索商品 · 导入包装营养标签</small></div></div>}
+    {(!compact||activeMethod==='search')&&<><div className="qh-search-field"><input aria-label="Woolworths 商品关键词或链接" placeholder="商品英文名、编号或商品链接" value={query} maxLength={300} onChange={e=>{cancelSearch();setQuery(e.target.value);setProducts([]);setSearched(false);setLibraryNotice("")}} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void search()}}}/><button type="button" disabled={busy||!query.trim()} onClick={()=>void search()}>{busy?"查询中…":"查询"}</button></div>
+    <div className="qh-search-links"><a href={searchUrl} target="_blank" rel="noreferrer">在 Woolworths 官网搜索 ↗</a>{!compact&&<button type="button" onClick={()=>method(showLabel?"search":"paste")}>粘贴 / 手填营养标签</button>}</div>
+    </>}{!compact&&<button className="qh-photo-entry" type="button" onClick={()=>method(showPhoto?"search":"photo")}>◎ 拍照 / 上传营养标签识别</button>}
     {showPhoto&&<PhotoNutritionCapture selected={selected} onImport={onImport} onClose={()=>setShowPhoto(false)}/>}
     {libraryNotice&&<p className="qh-search-hint" role="status">{libraryNotice}</p>}
-    {saved.length>0&&<div className="qh-library-local"><div className="qh-library-heading"><b>{query.trim()?`本地匹配 · ${localFoods.length} 项`:"常用食物 · 本地优先"}</b><small>置顶 → 记录次数 → 最近使用</small></div>{localFoods.slice(0,query.trim()?12:6).map(p=>{const usage=libraryUsage(p,entries);return <div className="qh-library-row" key={p.id}><ProductThumbnail src={p.imageUrl} name={p.name}/><button type="button" className="qh-library-use" aria-label={`使用本地商品 ${p.name}`} onClick={()=>{setEditingCount(false);onSelect(p)}}><b>{p.name}</b><small>{p.pinned?"★ 已置顶 · ":""}已记录 {usage.count} 次 · 本地标签</small></button>{onCache&&<button type="button" className="qh-library-pin" aria-label={`${p.pinned?"取消置顶":"置顶"} ${p.name}`} onClick={()=>onCache({...p,pinned:!p.pinned})}>{p.pinned?"★":"☆"}</button>}</div>})}{query.trim()&&!localFoods.length&&<p className="qh-search-hint">本地没有匹配商品，点击「查询」联网搜索。</p>}{query.trim()&&<button type="button" className="qh-library-online" disabled={busy} onClick={()=>void search(query,true)}>联网搜索 / 更新标签 ↗</button>}</div>}
-    <p className="qh-search-hint">联网查询仅发送商品关键词或链接，不发送健康记录。官网若限制访问，可使用标签导入。</p>
+    {(!compact||activeMethod==='search')&&saved.length>0&&<div className="qh-library-local"><div className="qh-library-heading"><b>{query.trim()?`本地匹配 · ${localFoods.length} 项`:"常用食物 · 本地优先"}</b><small>置顶 → 记录次数 → 最近使用</small></div>{localFoods.slice(0,query.trim()?12:compact?3:6).map(p=>{const usage=libraryUsage(p,entries);return <div className="qh-library-row" key={p.id}><ProductThumbnail src={p.imageUrl} name={p.name}/><button type="button" className="qh-library-use" aria-label={`使用本地商品 ${p.name}`} onClick={()=>{setEditingCount(false);onSelect(p)}}><b>{p.name}</b><small>{p.pinned?"★ 已置顶 · ":""}已记录 {usage.count} 次 · 本地标签</small></button>{onCache&&<button type="button" className="qh-library-pin" aria-label={`${p.pinned?"取消置顶":"置顶"} ${p.name}`} onClick={()=>onCache({...p,pinned:!p.pinned})}>{p.pinned?"★":"☆"}</button>}</div>})}{query.trim()&&!localFoods.length&&<p className="qh-search-hint">本地没有匹配商品，点击「查询」联网搜索。</p>}{query.trim()&&<button type="button" className="qh-library-online" disabled={busy} onClick={()=>void search(query,true)}>联网搜索 / 更新标签 ↗</button>}</div>}
+    {!compact&&<p className="qh-search-hint">联网查询仅发送商品关键词或链接，不发送健康记录。官网若限制访问，可使用标签导入。</p>}{busy&&<div className="food-add-progress" role="status">正在查询，最多等待20秒<button type="button" onClick={cancelSearch}>取消查询</button></div>}
     {error&&<div role="alert" className="qh-food-error">{error}</div>}
     {searched&&products.length===0&&<p className="qh-search-hint">没有找到商品。试试英文名称，或打开官网查询。</p>}
-    {products.length>0&&<div className="qh-search-results">{products.map(p=><div key={p.id}><ProductThumbnail key={`${p.id}-${p.imageUrl}`} src={p.imageUrl} name={p.name}/><span>{p.name}<a href={p.url} target="_blank" rel="noreferrer">查看商品 ↗</a></span>{p.nutrition&&onCache&&<button type="button" disabled={busy} onClick={()=>cacheFood(p.nutrition!)}>{saved.some(f=>f.id===p.nutrition!.id)?"更新本地":"保存本地"}</button>}<button type="button" disabled={busy} onClick={()=>{setName(p.name);setSourceUrl(p.url);if(p.nutrition){setEditingCount(false);setError("");onImport(p.nutrition);setProducts([]);setSearched(false);setShowLabel(false)}else{void search(p.url,true)}}}>{p.nutrition?"预览标签":"读取完整标签"}</button></div>)}</div>}
-    {onFallback&&query.trim()&&<button type="button" className="qh-import-button" disabled={busy} onClick={()=>onFallback(query.trim())}>没有合适商品？用「{query.trim()}」生成通用估算</button>}
+    {(!compact||activeMethod==='search')&&products.length>0&&<div className="qh-search-results">{products.map(p=><div key={p.id}><ProductThumbnail key={`${p.id}-${p.imageUrl}`} src={p.imageUrl} name={p.name}/><span>{p.name}<a href={p.url} target="_blank" rel="noreferrer">查看商品 ↗</a></span>{p.nutrition&&onCache&&<button type="button" disabled={busy} onClick={()=>cacheFood(p.nutrition!)}>{saved.some(f=>f.id===p.nutrition!.id)?"更新本地":"保存本地"}</button>}<button type="button" disabled={busy} onClick={()=>{setName(p.name);setSourceUrl(p.url);if(p.nutrition){setEditingCount(false);setError("");onImport(p.nutrition);setProducts([]);setSearched(false);setShowLabel(false)}else{void search(p.url,true)}}}>{p.nutrition?"预览标签":"读取完整标签"}</button></div>)}</div>}
+    {(!compact||activeMethod==='search')&&onFallback&&query.trim()&&<button type="button" className="qh-import-button" disabled={busy} onClick={()=>onFallback(query.trim())}>没有合适商品？用「{query.trim()}」生成通用估算</button>}
     {showLabel&&sourceUrl&&<button type="button" className="qh-library-online" disabled={busy} onClick={()=>void search(sourceUrl,true)}>重试读取此商品的完整标签</button>}
     {showLabel&&<div className="qh-label-import">
       <label>商品名称<input value={name} onChange={e=>setName(e.target.value)} maxLength={120} placeholder="例如 Woolworths Full Cream Milk 3L"/></label>
-      <label>商品来源链接（可选）<input value={sourceUrl} onChange={e=>setSourceUrl(e.target.value)} placeholder="https://www.woolworths.com.au/shop/productdetails/…"/></label>
-      <div className="qh-import-switch"><button className={!manual?"active":""} type="button" onClick={()=>setManual(false)}>粘贴自动识别</button><button className={manual?"active":""} type="button" onClick={()=>setManual(true)}>手动填写标签</button></div>
-      {!manual?<><label>完整营养表<textarea value={label} onChange={e=>setLabel(e.target.value)} maxLength={20000} placeholder={'从商品页复制 Nutrition information，包含表头和全部数值，例如：\nQuantity Per Serving  Quantity Per 100mL\nEnergy 660 kJ 264 kJ\nProtein 8.2 g 3.3 g\nFat, Total 8.5 g 3.4 g\nCarbohydrate 12 g 4.8 g'}/></label><label>每 100 g / mL 的数值位于<select value={column} onChange={e=>setColumn(e.target.value as "last"|"first")}><option value="last">最后一列（Woolworths 常见顺序）</option><option value="first">第一列</option></select></label></>:<><div className="qh-label-energy"><label>每 100 g / mL 热量<input type="number" min="0" step="any" value={energy} onChange={e=>setEnergy(e.target.value)}/></label><label>热量单位<select value={energyUnit} onChange={e=>setEnergyUnit(e.target.value)}><option>kJ</option><option>kcal</option></select></label></div><div className="qh-custom-macros">{[["蛋白质",protein,setProtein],["碳水",carbs,setCarbs],["脂肪",fat,setFat]].map(([key,value,setter])=><label key={String(key)}>{String(key)}（g）<input type="number" min="0" max="100" step="any" value={String(value)} onChange={e=>(setter as (v:string)=>void)(e.target.value)}/></label>)}</div></>}
+      <details className="food-add-source"><summary>来源链接（可选）</summary><label>商品来源链接（可选）<input value={sourceUrl} onChange={e=>setSourceUrl(e.target.value)} placeholder="https://www.woolworths.com.au/shop/productdetails/…"/></label></details>
+      {!compact&&<div className="qh-import-switch"><button className={!manual?"active":""} type="button" onClick={()=>setManual(false)}>粘贴自动识别</button><button className={manual?"active":""} type="button" onClick={()=>setManual(true)}>手动填写标签</button></div>}
+      {!manual?<><label>完整营养表<textarea rows={4} aria-label="完整营养表" value={label} onChange={e=>setLabel(e.target.value)} maxLength={20000} placeholder={'粘贴完整营养表，包含 Per 100g / 100mL 表头和单位'}/></label><label>每100数值列<select value={column} onChange={e=>setColumn(e.target.value as "last"|"first")}><option value="last">最后一列（Woolworths 常见顺序）</option><option value="first">第一列</option></select></label></>:<><div className="qh-label-energy"><label>每 100 g / mL 热量<input type="number" min="0" step="any" value={energy} onChange={e=>setEnergy(e.target.value)}/></label><label>热量单位<select value={energyUnit} onChange={e=>setEnergyUnit(e.target.value)}><option>kJ</option><option>kcal</option></select></label></div><div className="qh-custom-macros">{[["蛋白质",protein,setProtein],["碳水",carbs,setCarbs],["脂肪",fat,setFat]].map(([key,value,setter])=><label key={String(key)}>{String(key)}（g）<input type="number" min="0" max="100" step="any" value={String(value)} onChange={e=>(setter as (v:string)=>void)(e.target.value)}/></label>)}</div></>}
       <label>标签计量单位<select value={unit} onChange={e=>setUnit(e.target.value as "g"|"mL")}><option value="g">每 100 g · 按重量记录</option><option value="mL">每 100 mL · 按体积记录</option></select></label>
-      <p className="qh-search-hint">导入后请核对下方数值与包装一致。kJ ÷ 4.184 换算为千卡；缺失值不会自动填成 0。</p><button className="qh-import-button" type="button" onClick={importLabel}>{manual?"使用这些标签数值":"识别并导入标签"}</button>
+      <p className="qh-search-hint">先预览核对，再确认添加。缺失值不会填成0。</p><button className="qh-import-button" type="button" onClick={importLabel}>{manual?"预览营养数值":"识别并预览"}</button>
     </div>}
-    {saved.length>0&&<label>我的商品库<select aria-label="已导入商品" value={selected?.id||""} onChange={e=>{const item=saved.find(p=>p.id===e.target.value);if(item){setEditingCount(false);onSelect(item)}}}><option value="" disabled>选择已导入的商品</option>{allFoods.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>}
-    {selected&&<div className="qh-nutrition-preview">
+    {(!compact||activeMethod==='search')&&saved.length>0&&<details className="food-add-library"><summary>全部商品库（{saved.length}）</summary><label>我的商品库<select aria-label="已导入商品" value={selected?.id||""} onChange={e=>{const item=saved.find(p=>p.id===e.target.value);if(item){setEditingCount(false);onSelect(item)}}}><option value="" disabled>选择已导入的商品</option>{allFoods.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label></details>}
+    {selected&&!compact&&<div className="qh-nutrition-preview">
       {onCache&&<button type="button" className="qh-import-button" onClick={()=>cacheFood(selected)}>↓ {saved.some(p=>p.id===selected.id)?"保存 / 更新本地商品标签":"保存到本地商品库"}</button>}
       <div className="qh-selected-product"><ProductThumbnail key={`${selected.id}-${selected.imageUrl}`} src={selected.imageUrl} name={selected.name}/><div><b>{selected.name}</b><small>{selected.source}{selected.sourceUrl&&<> · <a href={selected.sourceUrl} target="_blank" rel="noreferrer">查看来源 ↗</a></>}</small></div></div>
       <div className="qh-serving-details">

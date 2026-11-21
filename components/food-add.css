@@ -1,0 +1,30 @@
+/* A bounded two-step editor; keep imported labels in draft until confirmation. */
+.qh .food-add{max-width:880px;width:100%;box-sizing:border-box;margin:12px auto;padding:18px;border:1px solid #d9c8ab;border-radius:18px;background:#fffdf6;color:#604b37;font-size:14px;text-align:left}
+.qh .food-add [hidden]{display:none!important}
+.qh .food-add-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.qh .food-add-heading h3{font-size:20px;margin:0 0 4px;letter-spacing:0}
+.qh .food-add p{font-size:13px;line-height:1.5;margin:6px 0;color:#796b58}
+.qh .food-add-heading>span{font-size:12px;color:#71845f;white-space:nowrap}
+.qh .food-add .qh-woolworths{margin:0;padding:0;border:0;background:none}
+.qh .food-add-methods{display:flex;gap:6px;padding:4px;background:#f0eedf;border-radius:12px;margin-bottom:14px}
+.qh .food-add-methods button{flex:1;border:0;border-radius:9px;padding:9px 6px;background:none;color:#73654e;font-size:14px;min-height:40px}
+.qh .food-add-methods button[aria-selected=true]{background:#fffdf6;color:#3f6743;box-shadow:0 1px 5px #50442e18;font-weight:600}
+.qh .food-add label{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:14px;margin:0;color:#604b37}
+.qh .food-add :is(input,select,textarea){width:100%;box-sizing:border-box;min-width:0;max-width:100%;border:1px solid #cdbb9f;border-radius:9px;padding:9px 10px;margin:0;background:#fffefa;color:#493e30;font:inherit;font-size:16px;min-height:42px}
+.qh .food-add textarea{height:120px;min-height:100px;max-height:220px;resize:vertical;line-height:1.5}
+.qh .food-add .qh-label-import{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:none;border:0;padding:0;margin:0}
+.qh .food-add .qh-label-import>label:has(textarea),.qh .food-add .qh-label-import>label:first-child,.qh .food-add .qh-label-import>.qh-label-energy,.qh .food-add .qh-label-import>.qh-custom-macros,.qh .food-add .qh-label-import>p,.qh .food-add .qh-label-import>.qh-import-button{grid-column:1/-1}
+.qh .food-add .qh-label-import .qh-custom-macros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.qh .food-add .qh-label-energy{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.qh .food-add .food-add-source{grid-column:1/-1;order:5;font-size:13px}.qh .food-add .food-add-source label{margin-top:8px}
+.qh .food-add .qh-import-button,.qh .food-add-primary{background:#51754b;color:white;border:0;padding:11px 16px;border-radius:10px;font-size:15px;min-height:44px;box-shadow:none;margin:0}
+.qh .food-add .qh-import-button:disabled,.qh .food-add-primary:disabled{opacity:.5;cursor:default}
+.qh .food-add .qh-search-field{display:flex;gap:8px;margin:0}.qh .food-add .qh-search-field input{flex:1}.qh .food-add .qh-search-field button{min-width:70px;border:0;border-radius:9px;background:#51754b;color:#fff;padding:8px 12px}
+.qh .food-add .qh-search-links{margin:8px 0;font-size:12px}.qh .food-add .qh-library-local{padding:10px;margin:10px 0;background:#f6f5eb}.qh .food-add .qh-library-heading small,.qh .food-add .qh-library-use small{display:none}.qh .food-add .qh-library-use b{font-size:14px}.qh .food-add .qh-library-row{padding:5px 0}.qh .food-add .qh-product-thumbnail{width:32px;height:32px;flex-basis:32px}.qh .food-add .food-add-library{font-size:13px;margin:12px 0}.qh .food-add summary{cursor:pointer}.qh .food-add .food-add-library label{margin-top:10px}
+.qh .food-add .food-add-progress{display:flex;align-items:center;justify-content:space-between;padding:10px;background:#f2eedc;border-radius:9px;font-size:13px}.qh .food-add .food-add-progress button,.qh .food-add-back{border:0;background:none;color:#4a704a;text-decoration:underline;padding:5px 0;font-size:14px}
+.qh .food-add .qh-search-results{max-height:260px;overflow:auto}.qh .food-add .qh-search-results>div{padding:9px;gap:8px}.qh .food-add .qh-search-results span{font-size:14px}
+.qh .food-add-product{display:flex;align-items:center;gap:10px;margin:10px 0}.qh .food-add-product>.watercolor-art{width:54px;height:54px}.qh .food-add-product strong{font-size:17px}.qh .food-add-product small{display:block;font-size:12px;color:#7a765f;margin-top:4px}
+.qh .food-add-nutrients{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:12px;background:#f0f3e7;border-radius:12px;margin:12px 0}.qh .food-add-nutrients small{display:block;font-size:12px}.qh .food-add-nutrients b{display:block;font-size:20px;font-weight:500;margin-top:4px}.qh .food-add-nutrients em{font-size:12px;font-style:normal;margin-left:3px}
+.qh .food-add-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.qh .food-add-name{grid-column:1/-1}.qh .food-add-details{margin-top:12px;padding:8px 0;border-bottom:1px solid #e5ddce;font-size:13px}.qh .food-add-details .food-add-fields{margin-top:10px}
+.qh .food-add-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}.qh .food-add-actions small{display:block;font-size:12px;margin-top:3px;color:#7c765f}.qh .food-add-success{padding:12px;background:#edf3e4;border-radius:10px;color:#4f7048!important}.qh .food-add-estimate{display:grid;gap:10px}.qh .food-add-estimate h4{margin:0;font-size:16px}
+@media(max-width:600px){.qh .food-add{padding:12px;border-radius:12px;margin:8px 0}.qh .food-add-heading>span{display:none}.qh .food-add-heading h3{font-size:18px}.qh .food-add-methods{gap:2px}.qh .food-add-methods button{font-size:13px;padding:8px 3px}.qh .food-add-nutrients{padding:10px 7px}.qh .food-add-nutrients b{font-size:17px}.qh .food-add .qh-label-import{gap:10px}.qh .food-add .qh-label-import .qh-custom-macros{gap:6px}.qh .food-add .qh-label-import .qh-custom-macros label{font-size:12px}.qh .food-add-actions .food-add-primary{flex-shrink:0;padding:11px 13px}}
