@@ -1,6 +1,7 @@
 export const gardenCategories=['肉蛋奶','蔬菜','水果','碳水','油脂'] as const;
 export type GardenCategory=typeof gardenCategories[number];
 export function gardenCategory(name:string):GardenCategory|null{
+ if(/芝麻|sesame|tahini/i.test(name)&&!/芝麻糊|sweet|dessert|drink|soup|cake|biscuit|cracker|bread|面包|饼|年糕/i.test(name))return '油脂';
  if(/花生酱|坚果|杏仁|核桃|花生|奇亚|油|黄油|牛油果|nut|almond|peanut|chia|butter|avocado|oil/i.test(name))return '油脂';
  if(/蔬菜|生菜|西兰花|白菜|菠菜|木耳|胡萝卜|番茄|西红柿|茄子|黄瓜|蘑菇|菌|lettuce|broccoli|spinach|carrot|tomato|vegetable|mushroom/i.test(name))return '蔬菜';
  if(/芒果|梨|苹果|香蕉|橙|莓|葡萄|桃|西瓜|mango|pear|apple|banana|orange|berr|fruit|grape/i.test(name))return '水果';
@@ -26,6 +27,7 @@ export function mealFoodPriority(name:string,meal:string){
 export const marketDepartments=['蛋奶','豆制品','肉类','海鲜','蔬菜','水果','米面主食','坚果与油脂','零食点心','饮品','其他食物'] as const;
 export type MarketDepartment=typeof marketDepartments[number];
 export function marketDepartment(name:string):MarketDepartment{
+ if(/芝麻糊|sesame.*(?:drink|soup)/i.test(name))return '饮品';
  if(/corn chips|doritos|玉米片/i.test(name))return '米面主食';
  if(/椰子水|coconut.*water|h2coco/i.test(name))return '饮品';
  if(/饼干|曲奇|雪花酥|巧克力|蛋糕|冰淇淋|cracker|cookie|chocolate|cake|ice cream/i.test(name))return '零食点心';

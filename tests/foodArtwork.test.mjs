@@ -46,3 +46,5 @@ test('pumpkin names resolve to a pumpkin rather than the neutral grocery basket'
  assert.notEqual(foodArtwork('南瓜子')?.src,'/brand/watercolor-pumpkin-v1.png');
  assert.notEqual(foodArtwork('Pumpkin seeds')?.src,'/brand/watercolor-pumpkin-v1.png');
 });
+
+test('whole black sesame uses sesame art and oilseed category without relabelling desserts',async()=>{const {commonReference}=await import('../lib/marketCatalog.ts');for(const name of ['black sesame','黑芝麻粒','roasted black sesame seeds']){assert.equal(marketDepartment(name),'坚果与油脂');assert.equal(foodArtwork(name).src,'/brand/watercolor-black-sesame-v1.webp');assert.equal(commonReference(name).amount,5)}assert.equal(marketDepartment('黑芝麻糊'),'饮品');for(const name of ['black sesame powder','黑芝麻糊','black sesame cookies'])assert.notEqual(foodArtwork(name)?.src,'/brand/watercolor-black-sesame-v1.webp')});

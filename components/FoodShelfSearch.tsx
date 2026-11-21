@@ -6,6 +6,7 @@ import {marketDepartment,marketDepartments} from '@/lib/gardenCategories';
 import {sameLibraryFood} from '@/lib/foodLibrary';
 import WoolworthsFoodSearch from './WoolworthsFoodSearch';
 import FoodIllustration from './FoodIllustration';
+import {commonReference} from '@/lib/marketCatalog';
 import './food-add.css';
 
 export default function FoodShelfSearch({catalog,entries,onConfirm}:{catalog:FoodNutrition[];entries:HealthEntry[];onConfirm:(food:FoodNutrition)=>void}){
@@ -17,8 +18,8 @@ export default function FoodShelfSearch({catalog,entries,onConfirm}:{catalog:Foo
  function cancelEstimate(){generation.current++;controller.current?.abort();setBusy(false)}
  function preview(food:FoodNutrition){
   cancelEstimate();setDraft(food);setNotice('');setError('');setEstimateName('');
-  setAmount(String((food.unit==='g'?food.serving?.grams:food.serving?.millilitres)||100));
-  setQuantity(String(food.serving?.quantity||''));setUnit(food.serving?.quantityUnit||'个');setDepartment(food.marketDepartmentOverride||marketDepartment(food.name));
+  setAmount(String((food.unit==='g'?food.serving?.grams:food.serving?.millilitres)||commonReference(food.name)?.amount||100));
+  setQuantity(String(food.serving?.quantity||''));setUnit(food.serving?.quantityUnit||'个');setDepartment(food.marketDepartmentOverride&&food.marketDepartmentOverride!=='其他食物'?food.marketDepartmentOverride:marketDepartment(food.name));
  }
  async function estimate(){
   if(busy||!estimateName.trim())return;
@@ -38,6 +39,7 @@ export default function FoodShelfSearch({catalog,entries,onConfirm}:{catalog:Foo
   <div hidden={!!draft||!!estimateName}><WoolworthsFoodSearch compact staged saved={catalog} entries={entries} selected={draft} onSelect={preview} onImport={preview} onFallback={q=>{cancelEstimate();setEstimateName(q);setDraft(null);setError('');setNotice('');setDescription('')}}/></div>
   {estimateName&&<div className="food-add-estimate"><button type="button" className="food-add-back" onClick={()=>{cancelEstimate();setEstimateName('');setError('')}}>返回搜索</button><h4>通用估算</h4><p>找不到包装标签时使用，结果会标记为估算。</p><label>食物名称<input value={estimateName} maxLength={120} onChange={e=>setEstimateName(e.target.value)}/></label><label>做法与称重状态<input placeholder="例如：生重、去皮、水煮" maxLength={1000} value={description} onChange={e=>setDescription(e.target.value)}/></label><label>参考单位<select value={estimateUnit} onChange={e=>setEstimateUnit(e.target.value as 'g'|'mL')}><option value="g">每100g</option><option value="mL">每100mL</option></select></label><div className="food-add-actions"><button type="button" className="food-add-primary" disabled={busy||!estimateName.trim()} onClick={()=>void estimate()}>{busy?'正在估算…':'生成预览'}</button>{busy&&<button type="button" onClick={cancelEstimate}>取消等待</button>}</div></div>}
   {draft&&<div className="food-add-review"><button type="button" className="food-add-back" onClick={()=>setDraft(null)}>返回修改标签</button><div className="food-add-product"><FoodIllustration name={draft.name}/><div><strong>{draft.name}</strong><small>{draft.source} · 每100{draft.unit}</small></div></div>
+   {draft.source==='AI估算'&&<p className="food-add-basis"><b>通用估算，非商品标签</b><span>本次口径：{draft.labelEvidence?.split('口径：')[1]?.split('；假设：')[0]||'请展开营养依据核对食物形态和称重状态。'}</span></p>}
    <div className="food-add-nutrients" aria-label="每100营养预览">{([['energyKcal','热量','千卡'],['protein','蛋白质','g'],['carbs','碳水','g'],['fat','脂肪','g']] as const).map(([key,title,suffix])=><div key={key}><small>{title}</small><b>{draft.lessThan?.[key]?'< ':''}{Number(draft[key].toFixed(1))}<em>{suffix}</em></b></div>)}</div>
    <div className="food-add-fields"><label className="food-add-name">食物名称<input maxLength={120} value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value})}/></label><label>分类<select value={department} onChange={e=>setDepartment(e.target.value)}>{marketDepartments.map(d=><option key={d}>{d}</option>)}</select></label><label>每次添加的分量（{draft.unit}）<input type="number" min="0.01" max="10000" step="any" value={amount} onChange={e=>setAmount(e.target.value)}/></label></div>
    <details className="food-add-details"><summary>按个数添加（可选）</summary><div className="food-add-fields"><label>对应个数<input type="number" min="0.01" step="any" placeholder="例如 1" value={quantity} onChange={e=>setQuantity(e.target.value)}/></label><label>个数单位<input maxLength={30} value={unit} onChange={e=>setUnit(e.target.value)} placeholder="个 / 片 / 杯"/></label></div></details>

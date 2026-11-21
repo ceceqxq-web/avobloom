@@ -7,7 +7,8 @@ export function withMarketServing(food:GardenFood,amount:number){
  if(food.template?.weightUnknown)throw new Error('请先补全这项食物的重量和营养依据');
  return {...food.label,serving:{description:`1份 · ${amount}${food.label.unit}`,grams:food.label.unit==='g'?amount:null,millilitres:food.label.unit==='mL'?amount:null,quantity:1,quantityUnit:'份',quantitySource:'manual' as const}};
 }
-function commonReference(name:string):{amount:number;caption:string}|null{
+export function commonReference(name:string):{amount:number;caption:string}|null{
+ if(/芝麻|sesame|tahini/i.test(name)&&!/芝麻糊|sweet|dessert|drink|soup|cake|biscuit|cracker|bread|面包|饼|年糕/i.test(name))return {amount:5,caption:'1小勺'};
  if(/生|raw|干米/.test(name)&&/米|rice/i.test(name))return {amount:50,caption:'1小份干米'};
  if(/鸡蛋|egg/i.test(name)&&!/粉|white|蛋白|raw|生/i.test(name))return {amount:50,caption:'约1个'};
  if(/米饭|糙米|熟米|rice/i.test(name)&&!/raw|生/i.test(name))return {amount:150,caption:'约1小碗'};
