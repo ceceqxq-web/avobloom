@@ -3,12 +3,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {rankedLibrary,libraryUsage,mergeLibraryFood} from "@/lib/foodLibrary";
 import type {HealthEntry} from "@/lib/foodRecord";
 import FoodIllustration from "./FoodIllustration";
-import {commonFoodReferences} from "@/lib/commonFoodReferences";
+import {lookupFood,type GenericFoodDraft} from "@/lib/foodLookup";
 import type {FoodSearchQuery} from "@/lib/foodSearch";
 import PhotoNutritionCapture from "./PhotoNutritionCapture";
 import { parseNutritionLabel, servingFromLabel, woolworthsProductId, type FoodNutrition } from "@/lib/foodNutrition";
 type SearchProduct = { id: string; name: string; url: string; imageUrl?: string | null; nutrition?: FoodNutrition | null };
-type Props = { compact?:boolean; onSearchStart?:()=>void; onFallback?:(query:string)=>void;entries?:HealthEntry[];onCache?:(food:FoodNutrition)=>void; staged?:boolean; saved: FoodNutrition[]; selected: FoodNutrition | null; onSelect: (food: FoodNutrition) => void; onImport: (food: FoodNutrition) => void };
+type Props = { compact?:boolean; onSearchStart?:()=>void; onFallback?:(query:string,description?:string,unit?:"g"|"mL")=>void;entries?:HealthEntry[];onCache?:(food:FoodNutrition)=>void; staged?:boolean; saved: FoodNutrition[]; selected: FoodNutrition | null; onSelect: (food: FoodNutrition) => void; onImport: (food: FoodNutrition) => void };
 export default function WoolworthsFoodSearch({ saved, selected, onSelect, onImport, staged=false,entries=[],onCache,onFallback,onSearchStart,compact=false }: Props) {
   const [showPhoto,setShowPhoto]=useState(false);
   const [query, setQuery] = useState("");
@@ -24,6 +24,8 @@ export default function WoolworthsFoodSearch({ saved, selected, onSelect, onImpo
   const [libraryNotice,setLibraryNotice]=useState("");
   const localFoods=useMemo(()=>rankedLibrary(saved,entries,query),[saved,entries,query]),allFoods=useMemo(()=>rankedLibrary(saved,entries),[saved,entries]);
   const [resolved,setResolved]=useState<FoodSearchQuery|null>(null),[references,setReferences]=useState<FoodNutrition[]>([]);
+  const [matchedSaved,setMatchedSaved]=useState<FoodNutrition[]|null>(null),[genericDrafts,setGenericDrafts]=useState<GenericFoodDraft[]>([]);
+  const visibleLocalFoods=matchedSaved??localFoods;
   const [stage,setStage]=useState<'translate'|'search'|'match'|'generic'|''>('');
   const stageText={translate:'正在识别语言并转换英文关键词…',search:'正在查询 Woolworths 商品…',match:'正在核对候选商品是否匹配…',generic:'正在准备通用版本…'};
   const controller=useRef<AbortController|null>(null);
@@ -40,47 +42,42 @@ export default function WoolworthsFoodSearch({ saved, selected, onSelect, onImpo
   }
   const requestId = useRef(0);
   const searchUrl = `https://www.woolworths.com.au/shop/search/products?searchTerm=${encodeURIComponent(resolved?.englishQuery||query.trim())}`;
-  async function search(value = query,forceOnline=false) {
+  async function search(value = query,forceOnline=false,productName="") {
     if (!value.trim() || busy) return;
     controller.current?.abort();const requestController=new AbortController();controller.current=requestController;
     const id=++requestId.current,stale=()=>id!==requestId.current;
-    onSearchStart?.();setBusy(true);setStage('translate');setError('');setProducts([]);setReferences([]);setSearched(false);setLibraryNotice('');setResolved(null);
+    const directId=woolworthsProductId(value.trim());
+    onSearchStart?.();setBusy(true);setStage('translate');setError('');if(!directId){setMatchedSaved(null);setGenericDrafts([]);setProducts([]);setReferences([]);setSearched(false);setLibraryNotice('');setResolved(null);}
     async function jsonRequest(url:string,body?:object,timeout=30000){
       const response=await fetch(url,{...(body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{}),signal:AbortSignal.any([requestController.signal,AbortSignal.timeout(timeout)])});
       const data=await response.json();if(stale())throw new Error('superseded');return{response,data};
     }
-    async function suggest(foodQuery:FoodSearchQuery,reason:'empty'|'unavailable'|'unverified'){
-      if(stale())return;setStage('generic');setProducts([]);setSearched(false);
-      const notice=reason==='empty'?'Woolworths 未找到相符商品':reason==='unavailable'?'Woolworths 暂未响应，未能确认商品结果':'暂未完成候选商品核对';
-      setLibraryNotice(`${notice}，以下为通用版本，确认后才会添加。`);
-      const known=commonFoodReferences(foodQuery.englishQuery);
-      if(known.length){setReferences(known);return}
-      const {response,data}=await jsonRequest('/api/foods/estimate',{name:foodQuery.genericName,description:`原始输入：${foodQuery.original}；英文食物：${foodQuery.englishQuery}。${foodQuery.description}。这是未匹配品牌标签时的通用建议，请明确食物形态和称重口径，不能声称来自商品标签。`.slice(0,1000),unit:foodQuery.unit},60000);
-      if(!response.ok)throw new Error(data.error||'暂未能生成通用版本，可粘贴标签或补充食物形态后重试。');
-      setReferences([data.food]);
-    }
     try {
-      const translated=await jsonRequest('/api/foods/resolve-query',{query:value.trim()});
-      if(!translated.response.ok)throw new Error(translated.data.error||'暂未能识别食物名称，请重试。');
-      const foodQuery:FoodSearchQuery=translated.data.query;setResolved(foodQuery);
-      if(!foodQuery.isFood)throw new Error('暂未识别成具体食物，请补充名称、品种或品牌。');
-      setStage('search');
-      let found;
-      try{found=await jsonRequest(`/api/foods/woolworths?q=${encodeURIComponent(foodQuery.englishQuery)}${forceOnline?'&refresh=1':''}`,undefined,20000)}catch(e){if(stale())return;if(woolworthsProductId(value.trim()))throw e;await suggest(foodQuery,'unavailable');return}
-      if(!found.response.ok){if(woolworthsProductId(value.trim()))throw new Error(found.data.error||'暂未读到此商品完整标签，可粘贴标签。');await suggest(foodQuery,'unavailable');return}
-      if(found.data.product){setEditingCount(false);onImport(found.data.product);setName(found.data.product.name);return}
-      const candidates:SearchProduct[]=(found.data.products||[]).slice(0,12);
-      if(!candidates.length){await suggest(foodQuery,'empty');return}
-      setStage('match');
-      let verified;
-      try{verified=await jsonRequest('/api/foods/resolve-query',{query:value.trim(),products:candidates.map(p=>({id:p.id,name:p.name}))})}catch{if(stale())return;await suggest(foodQuery,'unverified');return}
-      if(!verified.response.ok){await suggest(foodQuery,'unverified');return}
-      const ids=new Set(verified.data.matchingIds as string[]),matches=candidates.filter(p=>ids.has(p.id));
-      if(!matches.length){await suggest(foodQuery,'empty');return}
-      setProducts(matches);setSearched(true);setLibraryNotice(`已按英文关键词「${foodQuery.englishQuery}」查询，并核对商品类型。请选择实际购买的品种。`);
+      if(directId){
+        const cached=!forceOnline?rankedLibrary(saved,entries,value.trim())[0]:undefined;if(cached){setEditingCount(false);onImport(cached);setName(cached.name);return}
+        setStage('search');
+        const {response,data}=await jsonRequest(`/api/foods/woolworths?q=${encodeURIComponent(value.trim())}${forceOnline?'&refresh=1':''}`,undefined,22000);
+        if(!response.ok)throw new Error(data.error||'暂未读到此商品完整标签，可重试或粘贴标签。');
+        if(!data.product)throw new Error('商品服务未返回完整标签，请重试或粘贴标签。');
+        setEditingCount(false);onImport(data.product);setName(data.product.name);setProducts([]);setSearched(false);return;
+      }
+      const result=await lookupFood(value.trim(),{
+        local:input=>rankedLibrary(saved,entries,input),signal:requestController.signal,stage:setStage,
+        resolve:async input=>{const {response,data}=await jsonRequest('/api/foods/resolve-query',{query:input});if(!response.ok)throw new Error(data.error||'语言识别暂不可用');return data.query},
+        search:async english=>{const {response,data}=await jsonRequest(`/api/foods/woolworths?q=${encodeURIComponent(english)}${forceOnline?'&refresh=1':''}`,undefined,20000);if(!response.ok)throw new Error(data.error||'商品查询暂不可用');return data},
+        match:async(input,candidates)=>{const {response,data}=await jsonRequest('/api/foods/resolve-query',{query:input,products:candidates.map(p=>({id:p.id,name:p.name}))});if(!response.ok)throw new Error(data.error||'商品核对暂不可用');return data.matchingIds},
+        estimate:async foodQuery=>{const {response,data}=await jsonRequest('/api/foods/estimate',{name:foodQuery.genericName,description:`原始输入：${foodQuery.original}；英文食物：${foodQuery.englishQuery}。${foodQuery.description}。这是通用建议，不能声称来自品牌标签。`.slice(0,1000),unit:foodQuery.unit},60000);if(!response.ok)throw new Error(data.error||'估算暂不可用');return data.food},
+      },forceOnline);
+      if(stale())return;
+      if(result.query)setResolved(result.query);
+      if(result.kind==='product'){setEditingCount(false);onImport(result.food);setName(result.food.name);return}
+      setLibraryNotice(result.notice);
+      if(result.kind==='saved'){setMatchedSaved(result.foods);setProducts([]);setSearched(false)}
+      else if(result.kind==='products'){setProducts(result.products);setSearched(true)}
+      else{setReferences(result.foods);setGenericDrafts(result.drafts);setSearched(false)}
     } catch (e) {
       if(stale())return;
-      setError(e instanceof Error&&e.name!=='TimeoutError'?e.message:'当前步骤超时，请重试或粘贴标签。');
+      setError((productName?`读取「${productName}」失败：`:'')+(e instanceof Error&&e.name!=='TimeoutError'?e.message:'当前步骤超时，请重试或粘贴标签。'));
     } finally {if(!stale()){setBusy(false);setStage('')}}
   }
   function importLabel() {
@@ -102,19 +99,20 @@ export default function WoolworthsFoodSearch({ saved, selected, onSelect, onImpo
   return <section className={`qh-woolworths ${compact?"food-add-compact":""}`} aria-label="Woolworths 商品搜索与导入">
     {compact&&<div className="food-add-methods" role="tablist" aria-label="添加食品方式">{([['search','搜索商品'],['paste','粘贴标签'],['manual','手动填写'],['photo','拍照识别']] as const).map(([key,title])=><button key={key} type="button" role="tab" aria-selected={activeMethod===key} onClick={()=>method(key)}>{title}</button>)}</div>}
     {!compact&&<div className="qh-wool-title"><span className="qh-wool-logo">W</span><div><b>Woolworths 商品</b><small>搜索商品 · 导入包装营养标签</small></div></div>}
-    {(!compact||activeMethod==='search')&&<><div className="qh-search-field"><input aria-label="Woolworths 商品关键词或链接" placeholder={compact?"食物中英文名、品牌或商品链接":"商品英文名、编号或商品链接"} value={query} maxLength={300} onChange={e=>{onSearchStart?.();cancelSearch();setError("");setQuery(e.target.value);setResolved(null);setReferences([]);setProducts([]);setSearched(false);setLibraryNotice("")}} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void search()}}}/><button type="button" disabled={busy||!query.trim()} onClick={()=>void search()}>{busy?"处理中…":"查询"}</button></div>
+    {(!compact||activeMethod==='search')&&<><div className="qh-search-field"><input aria-label="Woolworths 商品关键词或链接" placeholder={compact?"食物中英文名、品牌或商品链接":"商品英文名、编号或商品链接"} value={query} maxLength={300} onChange={e=>{onSearchStart?.();cancelSearch();setError("");setQuery(e.target.value);setMatchedSaved(null);setGenericDrafts([]);setResolved(null);setReferences([]);setProducts([]);setSearched(false);setLibraryNotice("")}} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();void search()}}}/><button type="button" disabled={busy||!query.trim()} onClick={()=>void search()}>{busy?"处理中…":"查询"}</button></div>
     <div className="qh-search-links"><a href={searchUrl} target="_blank" rel="noreferrer">在 Woolworths 官网搜索 ↗</a>{!compact&&<button type="button" onClick={()=>method(showLabel?"search":"paste")}>粘贴 / 手填营养标签</button>}</div>
     </>}{!compact&&<button className="qh-photo-entry" type="button" onClick={()=>method(showPhoto?"search":"photo")}>◎ 拍照 / 上传营养标签识别</button>}
     {showPhoto&&<PhotoNutritionCapture selected={selected} onImport={onImport} onClose={()=>setShowPhoto(false)}/>}
     {resolved&&activeMethod==='search'&&resolved.isFood&&!woolworthsProductId(resolved.original)&&<p className="food-search-translation">英文检索词：<b>{resolved.englishQuery}</b></p>}
     {libraryNotice&&<p className="qh-search-hint" role="status">{libraryNotice}</p>}
-    {(!compact||activeMethod==='search')&&saved.length>0&&localFoods.length>0&&<div className="qh-library-local"><div className="qh-library-heading"><b>{query.trim()?`本地匹配 · ${localFoods.length} 项`:"常用食物 · 本地优先"}</b><small>置顶 → 记录次数 → 最近使用</small></div>{localFoods.slice(0,query.trim()?12:compact?3:6).map(p=>{const usage=libraryUsage(p,entries);return <div className="qh-library-row" key={p.id}><ProductThumbnail src={p.imageUrl} name={p.name}/><button type="button" className="qh-library-use" aria-label={`使用本地商品 ${p.name}`} onClick={()=>{cancelSearch();setError("");setEditingCount(false);onSelect(p)}}><b>{p.name}</b><small>{p.pinned?"★ 已置顶 · ":""}已记录 {usage.count} 次 · 本地标签</small></button>{onCache&&<button type="button" className="qh-library-pin" aria-label={`${p.pinned?"取消置顶":"置顶"} ${p.name}`} onClick={()=>onCache({...p,pinned:!p.pinned})}>{p.pinned?"★":"☆"}</button>}</div>})}{query.trim()&&!localFoods.length&&<p className="qh-search-hint">本地没有匹配商品，点击「查询」联网搜索。</p>}{query.trim()&&<button type="button" className="qh-library-online" disabled={busy} onClick={()=>void search(query,true)}>联网搜索 / 更新标签 ↗</button>}</div>}
+    {(!compact||activeMethod==='search')&&saved.length>0&&visibleLocalFoods.length>0&&<div className="qh-library-local"><div className="qh-library-heading"><b>{query.trim()?`已保存匹配 · ${visibleLocalFoods.length} 项`:"常用食物 · 本地优先"}</b><small>置顶 → 记录次数 → 最近使用</small></div>{visibleLocalFoods.slice(0,query.trim()?12:compact?3:6).map(p=>{const usage=libraryUsage(p,entries);return <div className="qh-library-row" key={p.id}><ProductThumbnail src={p.imageUrl} name={p.name}/><button type="button" className="qh-library-use" aria-label={`使用本地商品 ${p.name}`} onClick={()=>{cancelSearch();setError("");setEditingCount(false);onSelect(p)}}><b>{p.name}</b><small>{p.pinned?"★ 已置顶 · ":""}已记录 {usage.count} 次 · {p.source} · 已保存</small><span className="local-food-use-action">{p.source==='AI估算'||p.source==='通用估算'?'使用已存参考':'使用已存标签'} →</span></button>{onCache&&<button type="button" className="qh-library-pin" aria-label={`${p.pinned?"取消置顶":"置顶"} ${p.name}`} onClick={()=>onCache({...p,pinned:!p.pinned})}>{p.pinned?"★":"☆"}</button>}</div>})}{query.trim()&&!visibleLocalFoods.length&&<p className="qh-search-hint">本地没有匹配商品，点击「查询」联网搜索。</p>}{query.trim()&&<button type="button" className="qh-library-online" disabled={busy} onClick={()=>void search(query,true)}>联网搜索 / 更新标签 ↗</button>}</div>}
     {(!compact||activeMethod==='search')&&references.length>0&&<section className="food-reference-results" aria-label="通用食物营养参考"><header><b>{references.some(f=>f.source==='AI估算')?'通用版本 · AI估算':'通用食物 · USDA参考'}</b><small>{references.some(f=>f.source==='AI估算')?'非品牌营养标签，请核对形态和口径':'生重可食部分，按实际品种选择'}</small></header>{references.map(food=><div className="food-reference-row" key={food.id}><ProductThumbnail name={food.name}/><div><b>{food.name}</b><small>每100{food.unit} · {Number(food.energyKcal.toFixed(1))}千卡 · 蛋白质{Number(food.protein.toFixed(2))}g</small></div><button type="button" aria-label={`预览${food.name}`} onClick={()=>{cancelSearch();setError('');setEditingCount(false);onSelect(food)}}>预览</button></div>)}<button type="button" className="qh-library-online" disabled={busy} onClick={()=>void search(query,true)}>继续搜索 Woolworths 品牌商品</button></section>}
+    {genericDrafts.length>0&&activeMethod==='search'&&<section className="food-reference-results" aria-label="通用食品建议"><header><b>通用食品建议</b><small>尚未生成营养数值，请先核对食品形态</small></header>{genericDrafts.map(draft=><div className="food-reference-row" key={draft.name}><ProductThumbnail name={draft.name}/><div><b>{draft.name}</b><small>{draft.description}</small></div><button type="button" onClick={()=>{cancelSearch();if(onFallback)onFallback(draft.name,draft.description,draft.unit);else{method('manual');setName(draft.name);setUnit(draft.unit);setEnergy('');setProtein('');setCarbs('');setFat('')}}}>{onFallback?'核对并预览':'手动填写标签'}</button></div>)}</section>}
     {!compact&&<p className="qh-search-hint">联网查询仅发送商品关键词或链接，不发送健康记录。官网若限制访问，可使用标签导入。</p>}{busy&&<div className="food-add-progress" role="status">{stage?stageText[stage]:'正在处理…'}<button type="button" onClick={cancelSearch}>取消查询</button></div>}
     {error&&<div role="alert" className="qh-food-error">{error}{compact&&<button type="button" className="food-add-back" onClick={()=>{if(!name.trim())setName(query.trim());method("paste")}}>改用粘贴标签</button>}</div>}
     {searched&&products.length===0&&<p className="qh-search-hint">未找到相符商品，可使用通用版本或粘贴标签。</p>}
-    {(!compact||activeMethod==='search')&&products.length>0&&<div className="qh-search-results">{products.map(p=><div key={p.id}><ProductThumbnail key={`${p.id}-${p.imageUrl}`} src={p.imageUrl} name={p.name}/><span>{p.name}<a href={p.url} target="_blank" rel="noreferrer">查看商品 ↗</a></span>{p.nutrition&&onCache&&<button type="button" disabled={busy} onClick={()=>cacheFood(p.nutrition!)}>{saved.some(f=>f.id===p.nutrition!.id)?"更新本地":"保存本地"}</button>}<button type="button" disabled={busy} onClick={()=>{setName(p.name);setSourceUrl(p.url);if(p.nutrition){setEditingCount(false);setError("");onImport(p.nutrition);setProducts([]);setSearched(false);setShowLabel(false)}else{void search(p.url,true)}}}>{p.nutrition?"预览标签":"读取完整标签"}</button></div>)}</div>}
-    {(!compact||activeMethod==='search')&&onFallback&&query.trim()&&!references.length&&<button type="button" className="qh-import-button" disabled={busy} onClick={()=>onFallback(query.trim())}>没有合适商品？用「{query.trim()}」生成通用估算</button>}
+    {(!compact||activeMethod==='search')&&products.length>0&&<div className="qh-search-results">{products.map(p=><div key={p.id}><ProductThumbnail key={`${p.id}-${p.imageUrl}`} src={p.imageUrl} name={p.name}/><span>{p.name}<a href={p.url} target="_blank" rel="noreferrer">查看商品 ↗</a></span>{p.nutrition&&onCache&&<button type="button" disabled={busy} onClick={()=>cacheFood(p.nutrition!)}>{saved.some(f=>f.id===p.nutrition!.id)?"更新本地":"保存本地"}</button>}<button type="button" disabled={busy} onClick={()=>{setName(p.name);setSourceUrl(p.url);if(p.nutrition){setEditingCount(false);setError("");onImport(p.nutrition);setProducts([]);setSearched(false);setShowLabel(false)}else{void search(p.url,false,p.name)}}}>{p.nutrition?"预览标签":"读取完整标签"}</button></div>)}</div>}
+    {(!compact||activeMethod==='search')&&onFallback&&query.trim()&&!references.length&&!genericDrafts.length&&<button type="button" className="qh-import-button" disabled={busy} onClick={()=>onFallback(query.trim())}>没有合适商品？用「{query.trim()}」生成通用估算</button>}
     {showLabel&&sourceUrl&&<button type="button" className="qh-library-online" disabled={busy} onClick={()=>void search(sourceUrl,true)}>重试读取此商品的完整标签</button>}
     {showLabel&&<div className="qh-label-import">
       <label>商品名称<input value={name} onChange={e=>setName(e.target.value)} maxLength={120} placeholder="例如 Woolworths Full Cream Milk 3L"/></label>

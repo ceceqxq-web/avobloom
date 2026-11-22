@@ -36,3 +36,4 @@
 .qh .food-search-translation{padding:7px 0;color:#4d7049!important;font-size:13px!important;overflow-wrap:anywhere}.qh .food-add-progress{gap:10px}.qh .food-add-progress button{flex-shrink:0}
 
 .qh .food-add-basis{padding:10px 12px;background:#fff3da;border:1px solid #e7d2aa;border-radius:10px;color:#806134}.qh .food-add-basis b,.qh .food-add-basis span{display:block}.qh .food-add-basis span{margin-top:4px}
+.qh .local-food-use-action{display:inline-block;margin-top:5px;padding:4px 9px;border-radius:7px;background:#e8efdd;color:#456840;font-size:12px;font-weight:600}.qh .food-reference-results[aria-label="通用食品建议"] .food-reference-row small{white-space:normal;line-height:1.5}
