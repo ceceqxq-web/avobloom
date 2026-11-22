@@ -17,6 +17,7 @@ export type ServingInfo = {
 export type FoodNutrition = {
   lessThan?: NutritionBounds;
   hiddenInKitchen?: boolean;
+  artworkName?: string;
   pinned?: boolean;
   dailyPick?: boolean;
   marketDepartmentOverride?: import('./gardenCategories').MarketDepartment;

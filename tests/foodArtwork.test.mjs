@@ -48,3 +48,11 @@ test('pumpkin names resolve to a pumpkin rather than the neutral grocery basket'
 });
 
 test('whole black sesame uses sesame art and oilseed category without relabelling desserts',async()=>{const {commonReference}=await import('../lib/marketCatalog.ts');for(const name of ['black sesame','黑芝麻粒','roasted black sesame seeds']){assert.equal(marketDepartment(name),'坚果与油脂');assert.equal(foodArtwork(name).src,'/brand/watercolor-black-sesame-v1.webp');assert.equal(commonReference(name).amount,5)}assert.equal(marketDepartment('黑芝麻糊'),'饮品');for(const name of ['black sesame powder','黑芝麻糊','black sesame cookies'])assert.notEqual(foodArtwork(name)?.src,'/brand/watercolor-black-sesame-v1.webp')});
+
+test('fruit preserves use a jam jar and preserve manual artwork through label refresh',()=>{
+ for(const name of ['Beerenberg Strawberry Jam 300g','Blueberry Jam','草莓果酱','Orange Marmalade']){assert.deepEqual(foodArtwork(name),{cell:9,atlas:4});assert.equal(marketDepartment(name),'零食点心')}
+ assert.deepEqual(foodArtwork('fresh strawberry'),{cell:8,atlas:5});
+ const previous={id:'jam',name:'Jam',unit:'g',energyKcal:280,protein:0,carbs:70,fat:0,source:'Woolworths',artworkName:'果酱'};
+ assert.equal(mergeLibraryFood(previous,{...previous,artworkName:undefined}).artworkName,'果酱');
+ assert.equal(mergeLibraryFood(previous,{...previous,artworkName:''}).artworkName,'');
+});

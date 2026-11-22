@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {plateLayout} from '../lib/plateLayout.ts';
+test('tray food stays inside the safe area at phone and desktop sizes',()=>{for(const [w,h] of [[265,84],[640,100],[1,1]])for(const count of [0,1,8,25,100]){const positions=plateLayout(w,h,count);assert.equal(positions.length,count);positions.forEach((p,i)=>{assert.ok(p.left>=0&&p.top>=0);assert.ok(p.left+p.width<=w+.001);assert.ok(p.top+p.height<=h+.001);assert.equal(p.zIndex,i+1)})}});
+test('overflow items use a later stack layer without widening or scrolling the tray',()=>{const p=plateLayout(288,84,10);assert.ok(p[8].left>p[0].left);assert.ok(p[8].top>=p[0].top);assert.ok(p[8].zIndex>p[0].zIndex);assert.deepEqual(p,plateLayout(288,84,10))});

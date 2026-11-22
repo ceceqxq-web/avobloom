@@ -9,7 +9,7 @@ export function sameLibraryFood(a:FoodNutrition,b:FoodNutrition):boolean{
 }
 export function mergeLibraryFood(previous:FoodNutrition|undefined,incoming:FoodNutrition):FoodNutrition {
  const keepCount=previous?.serving?.quantitySource==="manual"&&incoming.serving?.quantitySource!=="manual"&&incoming.source!=="照片识别";
- return {...incoming,hiddenInKitchen:incoming.hiddenInKitchen??previous?.hiddenInKitchen??false,pinned:incoming.pinned??previous?.pinned??false,dailyPick:incoming.dailyPick??previous?.dailyPick??false,marketDepartmentOverride:incoming.marketDepartmentOverride??previous?.marketDepartmentOverride,...(keepCount?{serving:{...incoming.serving,quantity:previous!.serving!.quantity,quantityUnit:previous!.serving!.quantityUnit,quantitySource:"manual" as const}}:{})};
+ return {...incoming,artworkName:incoming.artworkName??previous?.artworkName,hiddenInKitchen:incoming.hiddenInKitchen??previous?.hiddenInKitchen??false,pinned:incoming.pinned??previous?.pinned??false,dailyPick:incoming.dailyPick??previous?.dailyPick??false,marketDepartmentOverride:incoming.marketDepartmentOverride??previous?.marketDepartmentOverride,...(keepCount?{serving:{...incoming.serving,quantity:previous!.serving!.quantity,quantityUnit:previous!.serving!.quantityUnit,quantitySource:"manual" as const}}:{})};
 }
 export function upsertLibraryFood(saved:FoodNutrition[],incoming:FoodNutrition):FoodNutrition[]{const duplicates=saved.filter(p=>sameLibraryFood(p,incoming));const previous=duplicates[0];const merged=duplicates.reduce<FoodNutrition|undefined>((value,p)=>value?mergeLibraryFood(value,p):p,undefined);const food=mergeLibraryFood(merged,incoming);return[{...food,id:previous?.id||food.id},...saved.filter(p=>!sameLibraryFood(p,incoming))]}
 

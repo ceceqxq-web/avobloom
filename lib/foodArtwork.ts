@@ -2,6 +2,7 @@ import {meatArt} from './meatVisual.ts';
 import {marketDepartment,type MarketDepartment} from './gardenCategories.ts';
 export type FoodArtwork={cell:number;atlas:number;src?:string};
 function plantArtwork(name:string):FoodArtwork|null{
+ if(/果酱|\bjam\b|marmalade|fruit preserve/i.test(name))return {cell:9,atlas:4};
  if(/黑芝麻|black\s*sesame/i.test(name)&&!/粉|糊|酱|糕|饼|paste|powder|flour|drink|soup|cake|cookie|biscuit/i.test(name))return {cell:0,atlas:0,src:'/brand/watercolor-black-sesame-v1.webp'};
  if(/南瓜|pumpkin|kabocha|butternut/i.test(name)&&!/南瓜子|pumpkin.*seed|seed.*pumpkin/i.test(name))return {cell:0,atlas:0,src:'/brand/watercolor-pumpkin-v1.png'};
  if(/corn chips|doritos|玉米片/i.test(name))return {cell:9,atlas:2};
