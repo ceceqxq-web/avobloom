@@ -1,7 +1,11 @@
-/** Fill the plate interior, then offset later layers without growing its height. */
+/** Fill one row, then visibly fan later foods over it, keeping every pile inside the rim. */
 export function plateLayout(width:number,height:number,count:number){
- const w=Math.max(1,width),h=Math.max(1,height),columns=Math.max(1,Math.min(Math.max(1,count),Math.floor(w/72))),rows=count>columns&&h>=80?2:1,capacity=columns*rows;
- const cardWidth=Math.min(64,w),cardHeight=Math.min(56,h/rows-4>0?h/rows-4:h);
- return Array.from({length:count},(_,index)=>{const layer=Math.floor(index/capacity),slot=index%capacity,col=slot%columns,row=Math.floor(slot/columns),shift=Math.min(layer,5)*5;
- return {position:'absolute' as const,left:Math.max(0,Math.min(w-cardWidth,(col+.5)*w/columns-cardWidth/2+shift)),top:Math.max(0,Math.min(h-cardHeight,(row+.5)*h/rows-cardHeight/2+shift)),width:cardWidth,height:cardHeight,zIndex:index+1,'--plate-art-height':`${Math.max(1,cardHeight-12)}px`};});
+ const w=Math.max(1,width),h=Math.max(1,height),columns=Math.max(1,Math.min(Math.max(1,count),Math.floor(w/90))),capacity=columns;
+ const cardWidth=Math.min(76,w),cardHeight=Math.min(60,h),layers=Math.ceil(count/capacity),spread=Math.min(24,Math.max(0,h-cardHeight));
+ return Array.from({length:count},(_,index)=>{const layer=Math.floor(index/capacity),col=index%capacity,offset=layer===0?0:layer%2?12:-12,top=layers<=1?(h-cardHeight)/2:(layer%4)/Math.min(3,Math.max(1,layers-1))*spread;
+ return {position:'absolute' as const,left:Math.max(0,Math.min(w-cardWidth,(col+.5)*w/columns-cardWidth/2+offset)),top:Math.max(0,Math.min(h-cardHeight,top)),width:cardWidth,height:cardHeight,zIndex:index+1,'--plate-art-height':`${Math.max(1,cardHeight)}px`,'--plate-tilt':`${layer===0?(col%2?3:-3):layer%2?8:-8}deg`};});
+}
+/** Undo a clear without discarding foods selected after clearing. */
+export function restorePlateSelection(current:Record<string,number>,previous:Record<string,number>){
+ const result={...current};for(const [id,amount] of Object.entries(previous))if(Number.isFinite(amount)&&amount>0)result[id]=Math.min(50,Math.max(0,result[id]||0)+amount);return result;
 }
